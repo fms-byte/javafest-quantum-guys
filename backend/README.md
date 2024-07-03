@@ -1,2 +1,3 @@
-This is Backend. 
-SpringBoot is a Java-based framework that is used to create web applications. It is built on top of the Java Virtual Machine (JVM) and is used to create standalone, production-grade Spring-based Applications
+## Backend - Javafest Project
+
+The Backend will be developed using Spring Boot and Java. The backend will be responsible for handling the business logic and interacting with the database. The backend will expose REST APIs that the frontend will consume.

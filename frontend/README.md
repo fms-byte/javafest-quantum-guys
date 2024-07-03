@@ -1,2 +1,3 @@
-This is Frontend.
-Next.js is a React-based framework that is used to create web applications. It is built on top of React and is used to create production-grade React-based Applications
+## Frontend - Javafest Project
+
+The Frontend will be developed using Next.js and typescript. The frontend will be responsible for rendering the UI and handling user interactions. The frontend will communicate with the backend using REST APIs.
