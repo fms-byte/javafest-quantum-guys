@@ -1,16 +1,87 @@
 "use client";
-import { useState, useEffect } from 'react'
-import { feedData, FeedItem } from '@/lib/db';
+import { useState, useEffect } from "react";
+import { feedData, FeedItem } from "@/lib/db";
+import CommentForm from "./CommentForm";
+
+type Comment = {
+  id: string;
+  user: string;
+  content: string;
+  replies: Comment[];
+};
+
+type FeedItemWithComments = FeedItem & {
+  comments: Comment[];
+};
+
 export default function Feed() {
-  const [feedItems, setFeedItems] = useState<FeedItem[]>([])
+  const [feedItems, setFeedItems] = useState<FeedItemWithComments[]>([]);
 
   useEffect(() => {
-    setFeedItems(feedData)
-  }, [])
+    setFeedItems(feedData.map((item) => ({ ...item, comments: [] })));
+  }, []);
+
+  const addComment = (
+    itemId: string,
+    content: string,
+    parentCommentId?: string
+  ) => {
+    setFeedItems((prevItems) =>
+      prevItems.map((item) => {
+        if (item.id === itemId) {
+          const newComment: Comment = {
+            id: Date.now().toString(),
+            user: "Current User", // Replace with actual user name
+            content,
+            replies: [],
+          };
+
+          if (parentCommentId) {
+            return {
+              ...item,
+              comments: item.comments.map((comment) =>
+                comment.id === parentCommentId
+                  ? { ...comment, replies: [...comment.replies, newComment] }
+                  : comment
+              ),
+            };
+          } else {
+            return {
+              ...item,
+              comments: [...item.comments, newComment],
+            };
+          }
+        }
+        return item;
+      })
+    );
+  };
+
+  const CommentItem = ({
+    comment,
+    itemId,
+  }: {
+    comment: Comment;
+    itemId: string;
+  }) => (
+    <div className="mt-4 pl-4 border-l-2 border-gray-200">
+      <p className="font-semibold">{comment.user}</p>
+      <p>{comment.content}</p>
+      {comment.replies.map((reply) => (
+        <CommentItem key={reply.id} comment={reply} itemId={itemId} />
+      ))}
+      <CommentForm
+        itemId={itemId}
+        parentCommentId={comment.id}
+        onSubmit={(content) => addComment(itemId, content, comment.id)}
+        placeholder="Write a reply..."
+      />
+    </div>
+  );
 
   return (
     <div className="space-y-6">
-      {feedItems.map(item => (
+      {feedItems.map((item) => (
         <div key={item.id} className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-2">{item.title}</h2>
           <p className="text-sm text-gray-600 mb-2">
@@ -18,20 +89,58 @@ export default function Feed() {
           </p>
           <p className="text-gray-700">{item.summary}</p>
           <div className="mt-4 flex items-center space-x-4">
-            <button className="text-indigo-600 hover:underline">Read more</button>
-            <button title='like' className="text-gray-600 hover:text-gray-900">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            <button className="text-indigo-600 hover:underline">
+              Read more
+            </button>
+            <button title="like" className="text-gray-600 hover:text-gray-900">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
               </svg>
             </button>
-            <button title='share' className="text-gray-600 hover:text-gray-900">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            <button title="share" className="text-gray-600 hover:text-gray-900">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                />
               </svg>
             </button>
+          </div>
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold">Comments</h3>
+            {item.comments.map((comment) => (
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                itemId={item.id}
+              />
+            ))}
+            <CommentForm
+              itemId={item.id}
+              onSubmit={(content) => addComment(item.id, content)}
+            />
           </div>
         </div>
       ))}
     </div>
-  )
+  );
 }
