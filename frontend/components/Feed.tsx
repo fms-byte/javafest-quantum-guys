@@ -1,100 +1,42 @@
 "use client";
 import { useState, useEffect } from "react";
 import { feedData, FeedItem } from "@/lib/db";
-import CommentForm from "./CommentForm";
-
-type Comment = {
-  id: string;
-  user: string;
-  content: string;
-  replies: Comment[];
-};
-
-type FeedItemWithComments = FeedItem & {
-  comments: Comment[];
-};
 
 export default function Feed() {
-  const [feedItems, setFeedItems] = useState<FeedItemWithComments[]>([]);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
 
   useEffect(() => {
-    setFeedItems(feedData.map((item) => ({ ...item, comments: [] })));
+    setFeedItems(feedData);
   }, []);
 
-  const addComment = (
-    itemId: string,
-    content: string,
-    parentCommentId?: string
-  ) => {
-    setFeedItems((prevItems) =>
-      prevItems.map((item) => {
-        if (item.id === itemId) {
-          const newComment: Comment = {
-            id: Date.now().toString(),
-            user: "Current User", // Replace with actual user name
-            content,
-            replies: [],
-          };
-
-          if (parentCommentId) {
-            return {
-              ...item,
-              comments: item.comments.map((comment) =>
-                comment.id === parentCommentId
-                  ? { ...comment, replies: [...comment.replies, newComment] }
-                  : comment
-              ),
-            };
-          } else {
-            return {
-              ...item,
-              comments: [...item.comments, newComment],
-            };
-          }
-        }
-        return item;
-      })
-    );
+  const handleLike = (id: string) => {
+    // Implement like functionality
   };
 
-  const CommentItem = ({
-    comment,
-    itemId,
-  }: {
-    comment: Comment;
-    itemId: string;
-  }) => (
-    <div className="mt-4 pl-4 border-l-2 border-gray-200">
-      <p className="font-semibold">{comment.user}</p>
-      <p>{comment.content}</p>
-      {comment.replies.map((reply) => (
-        <CommentItem key={reply.id} comment={reply} itemId={itemId} />
-      ))}
-      <CommentForm
-        itemId={itemId}
-        parentCommentId={comment.id}
-        onSubmit={(content) => addComment(itemId, content, comment.id)}
-        placeholder="Write a reply..."
-      />
-    </div>
-  );
+  const handleShare = (id: string) => {
+    // Implement share functionality
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col mx-auto w-full md:w-2/3 lg:w-1/2 p-2 md:p-4 space-y-4 md:space-y-6 overflow-y-auto">
       {feedItems.map((item) => (
-        <div key={item.id} className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-2">{item.title}</h2>
-          <p className="text-sm text-gray-600 mb-2">
+        <div key={item.id} className="bg-white p-4 md:p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+          <h2 className="text-lg md:text-xl font-semibold mb-2">{item.title}</h2>
+          <p className="text-xs md:text-sm text-gray-600 mb-2">
             {item.source} • {item.date}
           </p>
-          <p className="text-gray-700">{item.summary}</p>
+          <p className="text-sm md:text-base text-gray-700">{item.summary}</p>
           <div className="mt-4 flex items-center space-x-4">
-            <button className="text-indigo-600 hover:underline">
+            <button className="text-sm md:text-base text-indigo-600 hover:text-indigo-800 transition-colors duration-300">
               Read more
             </button>
-            <button title="like" className="text-gray-600 hover:text-gray-900">
+            <button 
+              onClick={() => handleLike(item.id)}
+              title="like" 
+              className="text-gray-600 hover:text-red-500 transition-colors duration-300"
+            >
               <svg
-                className="w-5 h-5"
+                className="w-4 h-4 md:w-5 md:h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -108,9 +50,13 @@ export default function Feed() {
                 />
               </svg>
             </button>
-            <button title="share" className="text-gray-600 hover:text-gray-900">
+            <button 
+              onClick={() => handleShare(item.id)}
+              title="share" 
+              className="text-gray-600 hover:text-blue-500 transition-colors duration-300"
+            >
               <svg
-                className="w-5 h-5"
+                className="w-4 h-4 md:w-5 md:h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -124,20 +70,6 @@ export default function Feed() {
                 />
               </svg>
             </button>
-          </div>
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold">Comments</h3>
-            {item.comments.map((comment) => (
-              <CommentItem
-                key={comment.id}
-                comment={comment}
-                itemId={item.id}
-              />
-            ))}
-            <CommentForm
-              itemId={item.id}
-              onSubmit={(content) => addComment(item.id, content)}
-            />
           </div>
         </div>
       ))}
