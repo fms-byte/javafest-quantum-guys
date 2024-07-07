@@ -32,7 +32,7 @@ export default function Dashboard() {
             <HashLoader color="#6366F1" size={50} />
           </div>
         }>
-          <div className="flex flex-col justify-between lg:flex-row flex-1 overflow-hidden">
+          <div className="max-w-7xl mx-auto flex flex-col justify-between lg:flex-row flex-1 overflow-hidden">
             <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
             <Feed />
             <RightSidebar />
