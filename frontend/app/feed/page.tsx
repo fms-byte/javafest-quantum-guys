@@ -1,33 +1,34 @@
 "use client";
-import { useState } from 'react'
-import Header from '@/components/Header'
-import Feed from '@/components/Feed'
-import Sidebar from '@/components/Sidebar'
-import TrendingTopics from '@/components/TrendingTopics'
-import Footer from '@/components/Footer';
+import { Suspense, lazy } from "react";
+import { useSidebar } from "@/lib/contexts/SidebarContext";
+import { HashLoader } from "react-spinners";
+const Sidebar = lazy(() => import("@/components/Sidebar"));
+const Feed = lazy(() => import("@/components/Feed"));
+const RightSidebar = lazy(() => import("@/components/RightSidebar"));
 
-export default function Home() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+export default function Dashboard() {
+  const { sidebarOpen, closeSidebar } = useSidebar();
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-          
-          <div className="flex-grow">
-            <h1 className="text-3xl font-bold mb-6">Your Updates</h1>
-            <Feed />
-          </div>
-          
-          <div className="lg:w-1/4">
-            <TrendingTopics />
-          </div>
+    <div className="flex flex-1 overflow-hidden">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black opacity-50 z-10 lg:hidden"
+          onClick={closeSidebar}
+        />
+      )}
+      
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen mx-auto">
+          <HashLoader color="#6366F1" size={50} />
         </div>
-      </main>
-      <Footer />
+      }>
+        <div className="max-w-7xl mx-auto flex flex-col justify-between lg:flex-row flex-1 overflow-hidden">
+          <Sidebar />
+          <Feed />
+          <RightSidebar />
+        </div>
+      </Suspense>
     </div>
-  )
+  );
 }
