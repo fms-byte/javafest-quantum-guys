@@ -7,20 +7,19 @@ import { BiCategoryAlt } from "react-icons/bi";
 import { MdEvent } from "react-icons/md";
 import { IoMdAlert } from "react-icons/io";
 
-type SidebarProps = {
-  open: boolean;
-  onClose: () => void;
-};
+import { useSidebar } from "@/lib/contexts/SidebarContext";
 
-const Sidebar: FC<SidebarProps> = ({ open, onClose }) => {
+export default function Sidebar() {
+  const { sidebarOpen, closeSidebar } = useSidebar();
+
   return (
     <aside
       className={`fixed inset-y-0 left-0 z-20 w-64 mt-4 lg:mt-0 bg-white shadow-lg transform ${
-        open ? "translate-x-0" : "-translate-x-full"
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
       } transition-transform duration-300 lg:relative lg:bg-transparent lg:translate-x-0 lg:w-1/4 lg:shadow-none`}
     >
       <div className="flex flex-col h-full p-4">
-        <button title="close" onClick={onClose} className="lg:hidden mb-4">
+        <button title="close" onClick={closeSidebar} className="lg:hidden mb-4">
           <svg
             className="w-6 h-6"
             fill="none"
@@ -68,5 +67,3 @@ const Sidebar: FC<SidebarProps> = ({ open, onClose }) => {
     </aside>
   );
 };
-
-export default Sidebar;

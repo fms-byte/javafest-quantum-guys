@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { feedData, FeedItem } from "@/lib/db";
+import Link from "next/link";
 
 export default function Feed() {
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
@@ -27,9 +28,9 @@ export default function Feed() {
           </p>
           <p className="text-sm md:text-base text-gray-700">{item.summary}</p>
           <div className="mt-4 flex items-center space-x-4">
-            <button className="text-sm md:text-base text-indigo-600 hover:text-indigo-800 transition-colors duration-300">
+            <Link href={`/feed/${item.id}`} className="text-sm md:text-base text-indigo-600 hover:text-indigo-800 transition-colors duration-300">
               Read more
-            </button>
+            </Link>
             <button 
               onClick={() => handleLike(item.id)}
               title="like" 

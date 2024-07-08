@@ -4,24 +4,25 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { FaUser } from "react-icons/fa";
 import ProfileSheet from "./ProfileSheet";
-
-type HeaderProps = {
-  onMenuClick: () => void;
-};
+import { useSidebar, SidebarProvider } from "@/lib/contexts/SidebarContext";
 
 const isLoggedIn = true; // this will be replaced with actual auth state management later on
 
-export default function Header({ onMenuClick }: HeaderProps) {
+export default function Header() {
+  const { toggleSidebar } = useSidebar();
   const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
-
   const toggleProfileSheet = () => setIsProfileSheetOpen(!isProfileSheetOpen);
 
   return (
-    <>
+    <SidebarProvider>
       <header className="bg-white shadow-md sticky top-0 z-50">
         <div className="max-w-6xl p-2 container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <div className="flex items-center">
-            <button onClick={onMenuClick} className="mr-4 lg:hidden" title="Menu">
+            <button
+              onClick={toggleSidebar}
+              className="mr-4 lg:hidden"
+              title="Menu"
+            >
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -77,6 +78,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </div>
       </header>
       <ProfileSheet isOpen={isProfileSheetOpen} onClose={toggleProfileSheet} />
-    </>
+    </SidebarProvider>
   );
 }
