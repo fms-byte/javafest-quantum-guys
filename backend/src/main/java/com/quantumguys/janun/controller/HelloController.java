@@ -5,8 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.quantumguys.janun.security.UserPrincipal;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 
 @RestController
+@Tag(name = "Hello", description = "Endpoints for basic testing")
 public class HelloController {
 
 	@GetMapping("/")

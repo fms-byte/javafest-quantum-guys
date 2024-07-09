@@ -38,6 +38,10 @@ public class SecurityConfig {
                .authorizeHttpRequests(registry -> registry
                                .requestMatchers("/").permitAll()
                                .requestMatchers("/auth/**").permitAll()
+
+                               .requestMatchers("/swagger-ui/**").permitAll()
+                               .requestMatchers("/v3/api-docs/**").permitAll()
+                               
                                .requestMatchers("/admin/**").hasAuthority("ADMIN")
                                .anyRequest().authenticated()
                );

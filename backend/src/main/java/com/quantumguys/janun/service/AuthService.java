@@ -15,7 +15,7 @@ import com.quantumguys.janun.dto.LoginDTO;
 import com.quantumguys.janun.dto.LoginResponseDTO;
 import com.quantumguys.janun.dto.RegisterDTO;
 import com.quantumguys.janun.entity.AuthUser;
-import com.quantumguys.janun.repository.UserRepository;
+import com.quantumguys.janun.repository.AuthUserRepository;
 import com.quantumguys.janun.security.JwtIssuer;
 import com.quantumguys.janun.security.UserPrincipal;
 
@@ -23,7 +23,7 @@ import com.quantumguys.janun.security.UserPrincipal;
 public class AuthService {
 
     @Autowired
-    private UserRepository userRepository;
+    private AuthUserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;

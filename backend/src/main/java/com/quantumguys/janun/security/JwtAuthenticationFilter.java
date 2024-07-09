@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.WebUtils;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -42,11 +43,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    // private Optional<String> extractToken(HttpServletRequest request){
+    //     var header = request.getHeader(jwtProperties.getHeader());
+    //     if(StringUtils.hasText(header) && header.startsWith("Bearer ")){
+    //         return Optional.of(header.substring(7));
+    //     }
+    //     return Optional.empty();
+    // }
+
+    // Get token from authorization header or cookie
     private Optional<String> extractToken(HttpServletRequest request){
         var header = request.getHeader(jwtProperties.getHeader());
         if(StringUtils.hasText(header) && header.startsWith("Bearer ")){
             return Optional.of(header.substring(7));
         }
+        
+        // Get token from cookie
+        var cookie = WebUtils.getCookie(request, "token");
+        if(cookie != null){
+            return Optional.of(cookie.getValue());
+        }
+        
         return Optional.empty();
     }
 }

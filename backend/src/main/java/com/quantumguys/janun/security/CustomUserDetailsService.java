@@ -10,18 +10,18 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import com.quantumguys.janun.entity.AuthUser;
-import com.quantumguys.janun.repository.UserRepository;
+import com.quantumguys.janun.repository.AuthUserRepository;
 
 @Component
 public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private UserRepository userRepository;
+    private AuthUserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        AuthUser user = userRepository.findByUsername(username)
+        AuthUser user = userRepository.findByUsernameOrEmail(username, username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         UserPrincipal userPrincipal= new UserPrincipal(user.getUsername(),user.getEmail(), user.getId(),user.getPassword() ,null);
