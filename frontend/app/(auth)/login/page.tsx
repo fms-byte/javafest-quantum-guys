@@ -1,86 +1,88 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { useAuthProvider } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { useState } from "react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const router = useRouter();
+  const auth = useAuthProvider();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle login logic here
-    console.log("Login attempt with:", { email, password });
-    router.push("/feed");
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+  } = useForm({
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = (data: { username: string; password: string }) => {
+    console.log(data);
+    setIsLoggingIn(true);
+    auth.login(data.username, data.password);
+    setIsLoggingIn(false);
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header onMenuClick={() => {}} />
-
       <main className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
+        <div className="max-w-md w-full space-y-8 rounded-md shadow-md p-8">
           <div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               Log in to your account
             </h2>
           </div>
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
             <input type="hidden" name="remember" value="true" />
-            <div className="rounded-md shadow-sm -space-y-px">
-              <div>
+            <div className="rounded-md -space-y-px">
+              <div className="mb-4">
                 <label htmlFor="email-address" className="sr-only">
-                  Email address
+                  Username or Email
                 </label>
                 <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="appearance-none mb-4 relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  type="username"
+                  className={`appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm ${
+                    errors.username ? "border-red-400" : ""
+                  }`}
+                  placeholder="Username or Email"
+                  {...register("username", { required: "Username or Email is required" })}
                 />
+                {errors.username && (
+                  <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>
+                )}
               </div>
-              <div>
+              <div className="mb-4">
                 <label htmlFor="password" className="sr-only">
                   Password
                 </label>
                 <input
                   id="password"
-                  name="password"
                   type="password"
-                  autoComplete="current-password"
-                  required
-                  className="appearance-none mb-4 relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className={`appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm ${
+                    errors.password ? "border-red-400" : ""
+                  }`}
                   placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register("password", { 
+                    required: "Password is required", 
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters long"
+                    }
+                  })}
                 />
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                )}
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-900"
-                >
-                  Remember me
-                </label>
-              </div>
-
+            <div className="flex items-center justify-end">
               <div className="text-sm">
                 <Link
                   href="/forgot-password"
@@ -113,8 +115,6 @@ export default function LoginPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

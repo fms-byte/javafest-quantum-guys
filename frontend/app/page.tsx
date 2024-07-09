@@ -1,13 +1,11 @@
 "use client";
-import Head from "next/head";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 import Link from "next/link";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header onMenuClick={() => {}} />
       <main className="flex-grow">
         <section className="bg-gradient-to-r from-indigo-500 to-cyan-400 text-white py-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -116,7 +114,6 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

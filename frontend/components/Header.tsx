@@ -1,20 +1,31 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { FaUser } from "react-icons/fa";
 import ProfileSheet from "./ProfileSheet";
-import { useSidebar, SidebarProvider } from "@/lib/contexts/SidebarContext";
-
-const isLoggedIn = true; // this will be replaced with actual auth state management later on
+import { useSidebar } from "@/lib/contexts/SidebarContext";
+import { useAuthProvider } from "@/lib/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const { toggleSidebar } = useSidebar();
   const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
   const toggleProfileSheet = () => setIsProfileSheetOpen(!isProfileSheetOpen);
+  const { user, loading, logout } = useAuthProvider();
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user && !loading) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  const isLoggedIn = Boolean(user && !loading);
 
   return (
-    <SidebarProvider>
+    <>
       <header className="bg-white shadow-md sticky top-0 z-50">
         <div className="max-w-6xl p-2 container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <div className="flex items-center">
@@ -78,6 +89,6 @@ export default function Header() {
         </div>
       </header>
       <ProfileSheet isOpen={isProfileSheetOpen} onClose={toggleProfileSheet} />
-    </SidebarProvider>
+    </>
   );
 }
