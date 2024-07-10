@@ -37,10 +37,9 @@ public class SecurityConfig {
                .securityMatcher("/**")
                .authorizeHttpRequests(registry -> registry
                                .requestMatchers("/").permitAll()
-                               .requestMatchers("/auth/**").permitAll()
+                               .requestMatchers("/auth/register", "/auth/login", "/auth/confirm","/auth/forgot-password", "/auth/reset-password").permitAll()
 
-                               .requestMatchers("/swagger-ui/**").permitAll()
-                               .requestMatchers("/v3/api-docs/**").permitAll()
+                               .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll()
                                
                                .requestMatchers("/admin/**").hasAuthority("ADMIN")
                                .anyRequest().authenticated()

@@ -3,12 +3,14 @@ package com.quantumguys.janun.dto;
 import java.time.LocalDateTime;
 
 import com.quantumguys.janun.entity.AuthUser;
+import com.quantumguys.janun.entity.Profile;
 
 public class AuthUserDTO {
 
     private String username;
     private String email;
     private String phone;
+    private Profile profile;
     private String role;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -25,6 +27,7 @@ public class AuthUserDTO {
         this.username = user.getUsername();
         this.email = user.getEmail();
         this.phone = user.getPhone();
+        this.profile = user.getProfile();
         this.role = user.getRole();
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
@@ -112,6 +115,14 @@ public class AuthUserDTO {
 
     public void setBanned(boolean banned) {
         this.banned = banned;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 
     
