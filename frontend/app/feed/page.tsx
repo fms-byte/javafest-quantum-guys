@@ -2,9 +2,9 @@
 import { Suspense, lazy } from "react";
 import { useSidebar } from "@/lib/contexts/SidebarContext";
 import { HashLoader } from "react-spinners";
-const Sidebar = lazy(() => import("@/components/Sidebar"));
-const Feed = lazy(() => import("@/components/Feed"));
-const RightSidebar = lazy(() => import("@/components/RightSidebar"));
+import Sidebar from "@/components/Sidebar";
+import Feed from "@/components/Feed";
+import RightSidebar from "@/components/RightSidebar";
 
 export default function Dashboard() {
   const { sidebarOpen, closeSidebar } = useSidebar();

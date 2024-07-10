@@ -9,29 +9,14 @@ export default function ProfilePage() {
   const { user, loading, logout } = useAuthProvider();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!user && !loading) {
-      router.push("/login");
-    }
-  }, [user, loading, router]);
-  
-  
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen bg-gray-100">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <div className="flex items-center">
             <div>
-              <h1 className="text-2xl font-semibold">{user.username}</h1>
-              <p className="text-sm text-gray-500">{user.email}</p>
+              {/* <h1 className="text-2xl font-semibold">{user.username}</h1>
+              <p className="text-sm text-gray-500">{user.email}</p> */}
               <button onClick={logout} className="text-sm text-red-500">
                 Logout
               </button>

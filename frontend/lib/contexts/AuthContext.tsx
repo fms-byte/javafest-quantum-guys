@@ -41,13 +41,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is logged in on initial load
-    const token = Cookies.get("token");
-    if (token) {
-      fetchUserData(token);
-    }
+    checkToken();
     setLoading(false);
   }, []);
+
+  const checkToken = async () => {
+    const savedToken = Cookies.get("token");
+    if (savedToken) {
+      setToken(savedToken);
+      fetchUserData(savedToken);
+    }
+  };
 
   const fetchUserData = async (token: string) => {
     try {
@@ -59,6 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser(data);
       } else {
         Cookies.remove("token");
+        setToken(null);
       }
     } catch (error) {
       console.error("Failed to fetch user data", error);
@@ -74,24 +79,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
+
       if (response.ok) {
-        const data: AuthResponse = await response.json();
+        const data = await response.json();
         setUser(data.user);
-        Cookies.set("token", data.token);
+        setToken(data.token);
+        Cookies.set("token", data.token, { secure: true, sameSite: "strict" });
         router.push("/feed");
       } else {
-        throw new Error("Login failed");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Login failed");
       }
     } catch (error) {
       console.error("Login error", error);
-      throw error;
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    Cookies.remove("token");
-    router.push("/login");
+  const logout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        setUser(null);
+        setToken(null);
+        Cookies.remove("token");
+        router.push("/login");
+      } else {
+        throw new Error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Logout error", error);
+    }
   };
 
   const signup = async (email: string, password: string, username: string) => {
@@ -101,11 +121,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, username }),
       });
+      
       if (response.ok) {
         const data: AuthResponse = await response.json();
         setUser(data.user);
+        setToken(data.token);
+        Cookies.set("token", data.token, { secure: true, sameSite: 'strict' });
+        router.push("/feed");
       } else {
-        throw new Error("Signup failed");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Signup failed");
       }
     } catch (error) {
       console.error("Signup error", error);

@@ -3,15 +3,17 @@ import Link from "next/link";
 import { trendingTopics } from "@/lib/db";
 import { BsFire } from "react-icons/bs";
 import { MdStarBorderPurple500 } from "react-icons/md";
+import { useAuthProvider } from "@/lib/contexts/AuthContext";
 
 const RightSidebar = () => {
+  const { logout } = useAuthProvider();
   return (
     <aside className="hidden w-full md:w-1/3 lg:w-1/4 lg:flex flex-col p-4 space-y-6 overflow-y-auto">
       <div className="bg-white shadow-md rounded-lg p-4 flex flex-col">
         <h2 className="text-xl font-semibold mb-4 mx-auto flex flex-1">
           <BsFire className="text-orange-500 mr-2" size={24} />
           Trending Topics
-          </h2>
+        </h2>
         <ul className="space-y-2 mx-auto">
           {trendingTopics.map((trendingTopic, index) => (
             <li key={index} className="flex items-center">
@@ -27,7 +29,7 @@ const RightSidebar = () => {
         <h2 className="text-xl font-semibold mb-4 mx-auto flex flex-1">
           <MdStarBorderPurple500 className="text-orange-500 mr-2" size={26} />
           Top Channels
-          </h2>
+        </h2>
         <ul className="space-y-2 mx-auto">
           {trendingTopics.map((trendingTopic, index) => (
             <li key={index} className="flex items-center">
@@ -39,6 +41,10 @@ const RightSidebar = () => {
           ))}
         </ul>
       </div>
+
+      <button onClick={logout} className="text-sm text-red-500">
+        Logout
+      </button>
     </aside>
   );
 };

@@ -6,23 +6,17 @@ import { FaUser } from "react-icons/fa";
 import ProfileSheet from "./ProfileSheet";
 import { useSidebar } from "@/lib/contexts/SidebarContext";
 import { useAuthProvider } from "@/lib/contexts/AuthContext";
-import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 export default function Header() {
   const { toggleSidebar } = useSidebar();
   const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
   const toggleProfileSheet = () => setIsProfileSheetOpen(!isProfileSheetOpen);
-  const { user, loading, logout } = useAuthProvider();
+  const { user, loading, logout } = useAuthProvider(); 
 
-  const router = useRouter();
+  TODO: Cookie SetUP
 
-  useEffect(() => {
-    if (!user && !loading) {
-      router.push("/login");
-    }
-  }, [user, loading, router]);
-
-  const isLoggedIn = Boolean(user && !loading);
+  const isLoggedIn = Boolean(!loading);
 
   return (
     <>
