@@ -1,58 +1,40 @@
 "use client";
-import { useState, useEffect } from 'react'
-import Head from 'next/head'
-import Header from '@/components/Header'
-import SubscriptionList from '@/components/SubscriptionList'
-import ActivityFeed from '@/components/ActivityFeed'
-
-type UserProfile = {
-  name: string
-  email: string
-  joinDate: string
-  bio: string
-  avatar: string
-}
+import { useState, useEffect } from "react";
+import SubscriptionList from "@/components/SubscriptionList";
+import ActivityFeed from "@/components/ActivityFeed";
+import { useAuthProvider } from "@/lib/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const { user, loading, logout } = useAuthProvider();
+  const router = useRouter();
 
   useEffect(() => {
-    const dummyProfile: UserProfile = {
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      joinDate: '2023-01-15',
-      bio: "Passionate about staying informed on Bangladesh's public affairs.",
-      avatar: '/avatar-placeholder.jpg',
+    if (!user && !loading) {
+      router.push("/login");
     }
-    setProfile(dummyProfile)
-  }, [])
+  }, [user, loading, router]);
+  
+  
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-  if (!profile) {
-    return <div>Loading...</div>
+  if (!user) {
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Head>
-        <title>Janun - User Profile</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Header onMenuClick={() => {}} />
-
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <div className="flex items-center">
-            <img 
-              src={profile.avatar} 
-              alt={profile.name} 
-              className="w-24 h-24 rounded-full mr-6"
-            />
             <div>
-              <h1 className="text-2xl font-bold mb-2">{profile.name}</h1>
-              <p className="text-gray-600 mb-1">{profile.email}</p>
-              <p className="text-gray-600 mb-2">Joined: {profile.joinDate}</p>
-              <p className="text-gray-700">{profile.bio}</p>
+              <h1 className="text-2xl font-semibold">{user.username}</h1>
+              <p className="text-sm text-gray-500">{user.email}</p>
+              <button onClick={logout} className="text-sm text-red-500">
+                Logout
+              </button>
             </div>
           </div>
         </div>
@@ -69,5 +51,5 @@ export default function ProfilePage() {
         </div>
       </main>
     </div>
-  )
+  );
 }
