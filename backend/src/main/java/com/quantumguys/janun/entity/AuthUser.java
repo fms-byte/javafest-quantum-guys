@@ -1,26 +1,19 @@
 package com.quantumguys.janun.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
 
 @Entity
-public class AuthUser {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+public class AuthUser extends BaseEntity{
     private LocalDateTime lastLogin;
     private LocalDateTime lastLogout;
 
@@ -46,31 +39,17 @@ public class AuthUser {
     @Column(columnDefinition = "boolean default false")
     private boolean banned;
 
+    @ManyToMany
+    private List<Thread> subscribedThreads;
+
+    private long subscribedThreadsCount;
+
+    @OneToMany(mappedBy = "user")
+    private List<Report> reports;
+
+    private long reportsCount;
+
     public AuthUser() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public LocalDateTime getLastLogin() {
@@ -137,13 +116,6 @@ public class AuthUser {
         this.banned = banned;
     }
 
-    @Override
-    public String toString() {
-        return "User [id=" + id + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", lastLogin=" + lastLogin
-                + ", lastLogout=" + lastLogout + ", email=" + email + ", password=" + password + ", phone=" + phone
-                + ", role=" + role + ", emailConfirmed=" + emailConfirmed + ", banned=" + banned + "]";
-    }
-
     public String getUsername() {
         return username;
     }
@@ -158,6 +130,38 @@ public class AuthUser {
 
     public void setProfile(Profile profile) {
         this.profile = profile;
+    }
+
+    public List<Thread> getSubscribedThreads() {
+        return subscribedThreads;
+    }
+
+    public void setSubscribedThreads(List<Thread> subscribedThreads) {
+        this.subscribedThreads = subscribedThreads;
+    }
+
+    public List<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(List<Report> reports) {
+        this.reports = reports;
+    }
+
+    public long getSubscribedThreadsCount() {
+        return subscribedThreadsCount;
+    }
+
+    public void setSubscribedThreadsCount(long subscribedThreadsCount) {
+        this.subscribedThreadsCount = subscribedThreadsCount;
+    }
+
+    public long getReportsCount() {
+        return reportsCount;
+    }
+
+    public void setReportsCount(long reportsCount) {
+        this.reportsCount = reportsCount;
     }
 
     

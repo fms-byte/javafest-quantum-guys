@@ -162,4 +162,8 @@ public class AuthService {
         AuthUser savedUser = userRepository.save(user);
         return new AuthUserDTO(savedUser);
     }
+
+    public boolean isUsernameAvailable(String username) {
+        return !userRepository.existsByUsername(username);
+    }
 }

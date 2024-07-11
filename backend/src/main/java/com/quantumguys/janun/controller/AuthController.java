@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Tag(name = "Auth", description = "Endpoints for user authentication.\n\n" + 
         "## Public Endpoints:\n" +
         "- **/register:** Registers a new user.\n" +
+        "- **/check-username:** Checks if the username is available.\n"+
         "- **/login:** Logs in a user.\n" +
         "- **/forgot-password:** Sends a reset password token to the user's email.\n" +
         "- **/reset-password:** Resets the user's password using the token.\n" +
@@ -165,6 +166,18 @@ public class AuthController {
             String username = userPrincipal.getUsername();
             AuthUserDTO user = userService.changePassword(username, changePasswordDTO);
             return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/check-username")
+    @Operation(description = "Check if the username is available")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Boolean.class)))
+    public ResponseEntity<?> checkUsername(@RequestParam String username) {
+        try {
+            boolean available = userService.isUsernameAvailable(username);
+            return ResponseEntity.ok(available);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
