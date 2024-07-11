@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useAuthProvider } from "@/lib/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,11 +21,16 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = (data: { username: string; password: string }) => {
-    console.log(data);
+  const onSubmit = async (data: { username: string; password: string }) => {
     setIsLoggingIn(true);
-    auth.login(data.username, data.password);
-    setIsLoggingIn(false);
+    try {
+      await auth.login(data.username, data.password);
+      setIsLoggingIn(false);
+      router.push("/feed");
+    } catch (error) {
+      setIsLoggingIn(false);
+      console.error("Login failed:", error);
+    }
   };
 
   return (
@@ -97,8 +102,9 @@ export default function LoginPage() {
               <button
                 type="submit"
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                disabled={isLoggingIn}
               >
-                Log in
+                {isLoggingIn ? "Logging in..." : "Log in"}
               </button>
             </div>
           </form>
