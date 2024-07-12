@@ -1,13 +1,14 @@
+"use server";
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export async function POST() {
   try {
-    const clearCookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Strict';
-    
+    cookies().set('token', '');    
     return NextResponse.json({ message: "Logged out successfully" }, {
       status: 200,
       headers: {
-        'Set-Cookie': clearCookie
+        'Set-Cookie': `token=; Max-Age=;`
       }
     });
   } catch (error) {

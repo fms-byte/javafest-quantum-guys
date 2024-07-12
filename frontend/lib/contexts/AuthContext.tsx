@@ -1,7 +1,6 @@
 "use client";
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 
 interface User {
   username: string;
@@ -23,11 +22,13 @@ interface AuthResponse {
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   loading: boolean;
+  isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   signup: (email: string, password: string, username: string) => Promise<void>;
+  checkAuth: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<{ success?: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,34 +37,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    checkToken();
-    setLoading(false);
+    const checkAuthStatus = async () => {
+      await checkAuth();
+    };
+    checkAuthStatus();
   }, []);
 
-  const checkToken = async () => {
-    const savedToken = Cookies.get("token");
-    if (savedToken) {
-      setToken(savedToken);
-      fetchUserData(savedToken);
-    }
-  };
-
-  const fetchUserData = async (token: string) => {
+  const checkAuth = async () => {
     try {
-      const response = await fetch("/api/auth/user", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch("/api/auth/user");
       if (response.ok) {
         const data: User = await response.json();
         setUser(data);
+        setIsAuthenticated(true);
       } else {
-        Cookies.remove("token");
-        setToken(null);
+        setIsAuthenticated(false);
+        setUser(null);
+        throw new Error("Failed to fetch user data");
       }
     } catch (error) {
       console.error("Failed to fetch user data", error);
@@ -83,8 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
-        setToken(data.token);
-        Cookies.set("token", data.token, { secure: true, sameSite: "strict" });
+        setIsAuthenticated(true);
         router.push("/feed");
       } else {
         const errorData = await response.json();
@@ -92,6 +86,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } catch (error) {
       console.error("Login error", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,14 +99,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (response.ok) {
         setUser(null);
-        setToken(null);
-        Cookies.remove("token");
+        setIsAuthenticated(false);
         router.push("/login");
       } else {
         throw new Error("Logout failed");
       }
     } catch (error) {
       console.error("Logout error", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -121,13 +118,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, username }),
       });
-      
+
       if (response.ok) {
-        const data: AuthResponse = await response.json();
-        setUser(data.user);
-        setToken(data.token);
-        Cookies.set("token", data.token, { secure: true, sameSite: 'strict' });
-        router.push("/feed");
+        router.push("/login");
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || "Signup failed");
@@ -135,12 +128,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (error) {
       console.error("Signup error", error);
       throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const forgotPassword = async (email: string) => {
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        return { success: true };
+      } else {
+        const errorData = await response.json();
+        return { success: false, error: errorData.error || "Forgot password failed" };
+      }
+    } catch (error) {
+      console.error("Forgot password error", error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, token, loading, login, logout, signup }}
+      value={{
+        user,
+        loading,
+        isAuthenticated,
+        login,
+        logout,
+        signup,
+        checkAuth,
+        forgotPassword,
+      }}
     >
       {children}
     </AuthContext.Provider>

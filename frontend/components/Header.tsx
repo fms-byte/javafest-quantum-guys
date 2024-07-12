@@ -1,22 +1,17 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { FaUser } from "react-icons/fa";
 import ProfileSheet from "./ProfileSheet";
 import { useSidebar } from "@/lib/contexts/SidebarContext";
 import { useAuthProvider } from "@/lib/contexts/AuthContext";
-import Cookies from "js-cookie";
 
 export default function Header() {
   const { toggleSidebar } = useSidebar();
   const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
   const toggleProfileSheet = () => setIsProfileSheetOpen(!isProfileSheetOpen);
-  const { user, loading, logout } = useAuthProvider(); 
-
-  TODO: Cookie SetUP
-
-  const isLoggedIn = Boolean(!loading);
+  const { isAuthenticated } = useAuthProvider(); 
 
   return (
     <>
@@ -44,14 +39,14 @@ export default function Header() {
               </svg>
             </button>
             <Link
-              href={isLoggedIn ? "/feed" : "/"}
+              href={isAuthenticated ? "/" : "/"}
               className="text-2xl font-bold text-indigo-600"
             >
               Janun
             </Link>
           </div>
           <div className="flex items-center">
-            {isLoggedIn ? (
+            {isAuthenticated ? (
               <div className="flex items-center">
                 <div className="relative hidden md:block mr-4">
                   <input
