@@ -2,8 +2,20 @@ package com.quantumguys.janun.entity;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.*;
+import org.modelmapper.ModelMapper;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @MappedSuperclass
 public abstract class BaseEntity {
     @Id
@@ -20,61 +32,24 @@ public abstract class BaseEntity {
     private Boolean premium = false;
 
     @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
+    public <T> T toDto(Class<T> clazz) {
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(this, clazz);
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void updateFromDto(Object dto) {
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        modelMapper.map(dto, this);
     }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
-    }
-
-    public void setHidden(Boolean hidden) {
-        this.hidden = hidden;
-    }
-
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public Boolean getHidden() {
-        return hidden;
-    }
-
-    public Boolean getPremium() {
-        return premium;
-    }
-
-    public void setPremium(Boolean premium) {
-        this.premium = premium;
-    }
-
 }

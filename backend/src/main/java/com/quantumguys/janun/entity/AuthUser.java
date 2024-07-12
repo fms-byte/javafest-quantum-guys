@@ -1,7 +1,8 @@
 package com.quantumguys.janun.entity;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -10,25 +11,29 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import lombok.Getter;
+import lombok.Setter;
 
-
+@Getter
+@Setter
 @Entity
 public class AuthUser extends BaseEntity{
     private LocalDateTime lastLogin;
     private LocalDateTime lastLogout;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
     
+    @Column(nullable = false)
     private String password;
     private String phone;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "profile_id", referencedColumnName = "id")
-    private Profile profile;
+    private Profile profile = new Profile();
 
     @Column(columnDefinition = "varchar(255) default 'user'")
     private String role;
@@ -39,130 +44,31 @@ public class AuthUser extends BaseEntity{
     @Column(columnDefinition = "boolean default false")
     private boolean banned;
 
-    @ManyToMany
-    private List<Thread> subscribedThreads;
-
     private long subscribedThreadsCount;
-
-    @OneToMany(mappedBy = "user")
-    private List<Report> reports;
-
     private long reportsCount;
 
-    public AuthUser() {
+    @ManyToMany
+    private Set<Thread> subscribedThreads= new HashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<Report> reports = new HashSet<>();
+
+
+    public void subscribeThread(Thread thread){
+        if(this.subscribedThreads.contains(thread))return;
+
+        this.subscribedThreads.add(thread);
+        this.subscribedThreadsCount++;
+        thread.getSubscribers().add(this);
+        thread.setSubscriberCount(thread.getSubscriberCount() + 1);
     }
 
-    public LocalDateTime getLastLogin() {
-        return lastLogin;
+    public void unsubscribeThread(Thread thread){
+        if(!this.subscribedThreads.contains(thread))return;
+        
+        this.subscribedThreads.remove(thread);
+        this.subscribedThreadsCount--;
+        thread.getSubscribers().remove(this);
+        thread.setSubscriberCount(thread.getSubscriberCount() - 1);
     }
-
-    public void setLastLogin(LocalDateTime lastLogin) {
-        this.lastLogin = lastLogin;
-    }
-
-    public LocalDateTime getLastLogout() {
-        return lastLogout;
-    }
-
-    public void setLastLogout(LocalDateTime lastLogout) {
-        this.lastLogout = lastLogout;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public boolean isEmailConfirmed() {
-        return emailConfirmed;
-    }
-
-    public void setEmailConfirmed(boolean emailConfirmed) {
-        this.emailConfirmed = emailConfirmed;
-    }
-
-    public boolean isBanned() {
-        return banned;
-    }
-
-    public void setBanned(boolean banned) {
-        this.banned = banned;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public Profile getProfile() {
-        return profile;
-    }
-
-    public void setProfile(Profile profile) {
-        this.profile = profile;
-    }
-
-    public List<Thread> getSubscribedThreads() {
-        return subscribedThreads;
-    }
-
-    public void setSubscribedThreads(List<Thread> subscribedThreads) {
-        this.subscribedThreads = subscribedThreads;
-    }
-
-    public List<Report> getReports() {
-        return reports;
-    }
-
-    public void setReports(List<Report> reports) {
-        this.reports = reports;
-    }
-
-    public long getSubscribedThreadsCount() {
-        return subscribedThreadsCount;
-    }
-
-    public void setSubscribedThreadsCount(long subscribedThreadsCount) {
-        this.subscribedThreadsCount = subscribedThreadsCount;
-    }
-
-    public long getReportsCount() {
-        return reportsCount;
-    }
-
-    public void setReportsCount(long reportsCount) {
-        this.reportsCount = reportsCount;
-    }
-
-    
 }
