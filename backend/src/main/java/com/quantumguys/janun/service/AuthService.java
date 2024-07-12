@@ -168,6 +168,6 @@ public class AuthService {
     }
 
     public UsernameAvailableDTO isUsernameAvailable(String username) {
-        return new UsernameAvailableDTO(!userRepository.existsByUsername(username));
+        return new UsernameAvailableDTO(username,!userRepository.existsByUsername(username));
     }
 }
