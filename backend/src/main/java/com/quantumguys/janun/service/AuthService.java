@@ -17,6 +17,7 @@ import com.quantumguys.janun.dto.LoginDTO;
 import com.quantumguys.janun.dto.LoginResponseDTO;
 import com.quantumguys.janun.dto.RegisterDTO;
 import com.quantumguys.janun.dto.ResetPasswordDTO;
+import com.quantumguys.janun.dto.UsernameAvailableDTO;
 import com.quantumguys.janun.entity.AuthUser;
 import com.quantumguys.janun.repository.AuthUserRepository;
 import com.quantumguys.janun.security.JwtIssuer;
@@ -67,7 +68,7 @@ public class AuthService {
 
         String token = jwtToken.create(new JwtPayload(savedUser.getEmail(),"confirmEmail"), 60*60*24*30);
         emailService.sendConfirmationEmail(user.getEmail(), token);
-        return new AuthUserDTO(savedUser);
+        return savedUser.toDto(AuthUserDTO.class);
     }
 
     public LoginResponseDTO loginUser(LoginDTO loginDTO) {
@@ -84,6 +85,9 @@ public class AuthService {
         if(user.isBanned()) throw new RuntimeException("User is banned");
         // if(!user.isEmailConfirmed()) throw new RuntimeException("Email not confirmed");
 
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
+
         var token = jwtIssuer.issue(user);
         
         return new LoginResponseDTO(user, token);
@@ -93,7 +97,7 @@ public class AuthService {
         AuthUser user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return new AuthUserDTO(user);
+        return user.toDto(AuthUserDTO.class);
     }
 
     public void forgotPassword(ForgotPasswordDTO forgotPasswordDTO) {
@@ -118,7 +122,7 @@ public class AuthService {
         user.setUpdatedAt(LocalDateTime.now());
         AuthUser savedUser = userRepository.save(user);
 
-        return new AuthUserDTO(savedUser);
+        return savedUser.toDto(AuthUserDTO.class);
     }
 
     public void resendConfirmationEmail(String email) {
@@ -160,10 +164,10 @@ public class AuthService {
         user.setUpdatedAt(LocalDateTime.now());
 
         AuthUser savedUser = userRepository.save(user);
-        return new AuthUserDTO(savedUser);
+        return savedUser.toDto(AuthUserDTO.class);
     }
 
-    public boolean isUsernameAvailable(String username) {
-        return !userRepository.existsByUsername(username);
+    public UsernameAvailableDTO isUsernameAvailable(String username) {
+        return new UsernameAvailableDTO(!userRepository.existsByUsername(username));
     }
 }

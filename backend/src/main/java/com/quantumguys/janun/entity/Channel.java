@@ -1,181 +1,73 @@
 package com.quantumguys.janun.entity;
 
-import java.net.URL;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 public class Channel extends BaseEntity {
 
+    @Column(unique = true)
+    private String slug;
+    
     private String name;
     private String description;
     private String language;
     private String city;
     private String country;
-    private URL logo;
-    private URL cover;
+    private String logo;
+    private String cover;
     
-    @ElementCollection
-    private List<URL> links;
-
     private long subscriberCount;
     private long postCount;
-    
-
-    @OneToMany(mappedBy = "channel")
-    private List<Thread> threads;
-
+    private long linkCount;
     private long threadCount;
-
-    @ManyToMany
-    private List<Tag> tags;
-
     private long tagCount;
 
-    public Channel() {
+
+    @ElementCollection
+    private Set<String> links = new HashSet<>();
+    
+    @OneToMany(mappedBy = "channel", orphanRemoval = true, cascade = CascadeType.ALL)
+    private Set<Thread> threads = new HashSet<>();
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Set<Tag> tags = new HashSet<>();
+    
+
+    public void addTag(Tag tag){
+        if(this.tags.contains(tag))return;
+        
+        this.tags.add(tag);
+        this.tagCount++;
+        tag.getChannels().add(this);
+        tag.setChannelCount(tag.getChannelCount()+1);
     }
 
-
-    public String getName() {
-        return name;
+    public void addTag(Set<Tag> tags){
+        tags.forEach(this::addTag);
     }
 
-
-    public void setName(String name) {
-        this.name = name;
+    public void removeTag(Tag tag){
+        if(!this.tags.contains(tag))return;
+        
+        this.tags.remove(tag);
+        this.tagCount--;
+        tag.getChannels().remove(this);
+        tag.setChannelCount(tag.getChannelCount()-1);
     }
 
-
-    public String getDescription() {
-        return description;
-    }
-
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-
-    public String getLanguage() {
-        return language;
-    }
-
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
-
-    public String getCity() {
-        return city;
-    }
-
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-
-    public String getCountry() {
-        return country;
-    }
-
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-
-    public URL getLogo() {
-        return logo;
-    }
-
-
-    public void setLogo(URL logo) {
-        this.logo = logo;
-    }
-
-
-    public URL getCover() {
-        return cover;
-    }
-
-
-    public void setCover(URL cover) {
-        this.cover = cover;
-    }
-
-
-    public List<URL> getLinks() {
-        return links;
-    }
-
-
-    public void setLinks(List<URL> links) {
-        this.links = links;
-    }
-
-
-    public long getSubscriberCount() {
-        return subscriberCount;
-    }
-
-
-    public void setSubscriberCount(long subscriberCount) {
-        this.subscriberCount = subscriberCount;
-    }
-
-
-    public long getPostCount() {
-        return postCount;
-    }
-
-
-    public void setPostCount(long postCount) {
-        this.postCount = postCount;
-    }
-
-
-    public List<Thread> getThreads() {
-        return threads;
-    }
-
-
-    public void setThreads(List<Thread> threads) {
-        this.threads = threads;
-    }
-
-
-    public List<Tag> getTags() {
-        return tags;
-    }
-
-
-    public void setTags(List<Tag> tags) {
-        this.tags = tags;
-    }
-
-
-    public long getThreadCount() {
-        return threadCount;
-    }
-
-
-    public void setThreadCount(long threadCount) {
-        this.threadCount = threadCount;
-    }
-
-
-    public long getTagCount() {
-        return tagCount;
-    }
-
-
-    public void setTagCount(long tagCount) {
-        this.tagCount = tagCount;
+    public void removeTag(Set<Tag> tags){
+        tags.forEach(this::removeTag);
     }
 }

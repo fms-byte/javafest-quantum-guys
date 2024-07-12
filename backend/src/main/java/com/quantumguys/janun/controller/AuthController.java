@@ -3,19 +3,22 @@ package com.quantumguys.janun.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.quantumguys.janun.dto.AuthUserDTO;
 import com.quantumguys.janun.dto.ChangePasswordDTO;
+import com.quantumguys.janun.dto.ErrorDTO;
 import com.quantumguys.janun.dto.ForgotPasswordDTO;
 import com.quantumguys.janun.dto.LoginDTO;
 import com.quantumguys.janun.dto.LoginResponseDTO;
 import com.quantumguys.janun.dto.RegisterDTO;
 import com.quantumguys.janun.dto.ResetPasswordDTO;
+import com.quantumguys.janun.dto.UsernameAvailableDTO;
 import com.quantumguys.janun.security.JwtProperties;
 import com.quantumguys.janun.security.UserPrincipal;
 import com.quantumguys.janun.service.AuthService;
@@ -27,8 +30,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -61,26 +63,26 @@ public class AuthController {
 
     @PostMapping("/register")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AuthUserDTO.class)))
-    public ResponseEntity<?> registerUser(@RequestBody @Validated RegisterDTO registerDTO) {
+    public ResponseEntity<?> registerUser(@RequestBody @Valid RegisterDTO registerDTO) {
         try {
             AuthUserDTO user = userService.registerUser(registerDTO);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
         }
     }
 
     @PostMapping("/login")
     @Operation(description = "Login with (username or email) and password")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginResponseDTO.class)))
-    public ResponseEntity<?> loginUser(@RequestBody @Validated LoginDTO loginDTO, HttpServletResponse response) {
+    public ResponseEntity<?> loginUser(@RequestBody @Valid LoginDTO loginDTO, HttpServletResponse response) {
         try {
             LoginResponseDTO responseDTO = userService.loginUser(loginDTO);
             addCookie(response, responseDTO.getToken());
             
             return ResponseEntity.ok(responseDTO);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
         }
     }
 
@@ -93,7 +95,7 @@ public class AuthController {
             AuthUserDTO user = userService.getUser(username);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
         }
     }
 
@@ -106,7 +108,7 @@ public class AuthController {
             deleteCookie(response);
             return ResponseEntity.ok("Logged out successfully");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
         }
     }
     
@@ -118,7 +120,7 @@ public class AuthController {
             userService.forgotPassword(forgotPasswordDTO);
             return ResponseEntity.ok("Password reset link sent to your email");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
         }
     }
 
@@ -130,7 +132,7 @@ public class AuthController {
             AuthUserDTO user = userService.resetPassword(resetPasswordDTO);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
         }
     }
 
@@ -142,7 +144,7 @@ public class AuthController {
             userService.resendConfirmationEmail(userPrincipal.getEmail());
             return ResponseEntity.ok("Confirmation email sent");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
         }
     }
 
@@ -154,7 +156,7 @@ public class AuthController {
             userService.confirmEmail(token);
             return ResponseEntity.ok("Email confirmed successfully");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
         }
     }
 
@@ -167,7 +169,7 @@ public class AuthController {
             AuthUserDTO user = userService.changePassword(username, changePasswordDTO);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
         }
     }
 
@@ -176,10 +178,10 @@ public class AuthController {
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Boolean.class)))
     public ResponseEntity<?> checkUsername(@RequestParam String username) {
         try {
-            boolean available = userService.isUsernameAvailable(username);
-            return ResponseEntity.ok(available);
+            UsernameAvailableDTO dto = userService.isUsernameAvailable(username);
+            return ResponseEntity.ok(dto);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
         }
     }
 

@@ -2,6 +2,11 @@ package com.quantumguys.janun.dto;
 
 import com.quantumguys.janun.entity.AuthUser;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class LoginResponseDTO {
 
     private String token;
@@ -11,23 +16,7 @@ public class LoginResponseDTO {
     }
 
     public LoginResponseDTO(AuthUser user,String token) {
-        this.user = new AuthUserDTO(user);
-        this.token = token;
-    }
-
-    public AuthUserDTO getUser() {
-        return user;
-    }
-
-    public void setUser(AuthUserDTO user) {
-        this.user = user;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
+        this.user = user.toDto(AuthUserDTO.class);
         this.token = token;
     }
 

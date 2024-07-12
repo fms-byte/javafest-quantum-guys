@@ -1,13 +1,11 @@
-package com.quantumguys.janun.entity;
+package com.quantumguys.janun.dto;
 
-import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Entity
-public class Profile extends BaseEntity {
+public class ProfileDto {
 
     private String name;
     private String avatar;
