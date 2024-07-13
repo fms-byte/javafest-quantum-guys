@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuthProvider } from "@/lib/contexts/AuthContext";
+import { HashLoader } from "react-spinners";
 
 interface FormData {
   username: string;
@@ -12,7 +13,7 @@ interface FormData {
 }
 
 export default function RegisterPage() {
-  const auth = useAuthProvider();
+  const {loading, signup} = useAuthProvider();
   const [isRegistering, setIsRegistering] = useState(false);
 
   const {
@@ -35,13 +36,21 @@ export default function RegisterPage() {
       return console.error("Passwords do not match");
     }
     try {
-      await auth.signup(data.email, data.password, data.username);
+      await signup(data.email, data.password, data.username);
       setIsRegistering(false);
     } catch (error) {
       setIsRegistering(false);
       console.error("Registration failed:", error);
     }
   };
+
+  if(loading || isRegistering) {
+    return (
+      <div className="flex items-center justify-center h-screen mx-auto">
+        <HashLoader color="#6366F1" size={50} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

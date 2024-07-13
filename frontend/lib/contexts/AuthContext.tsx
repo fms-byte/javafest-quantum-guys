@@ -1,6 +1,7 @@
 "use client";
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
 
 interface User {
   username: string;
@@ -28,10 +29,20 @@ interface AuthContextType {
   logout: () => void;
   signup: (email: string, password: string, username: string) => Promise<void>;
   checkAuth: () => Promise<void>;
-  forgotPassword: (email: string) => Promise<{ success?: boolean; error?: string }>;
+  forgotPassword: (
+    email: string
+  ) => Promise<{ success?: boolean; error?: string }>;
+  resetPassword: (
+    token: string,
+    password: string
+  ) => Promise<{ success?: boolean; message?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const toastStyle = {
+  marginTop: "60px",
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -40,13 +51,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const checkAuthStatus = async () => {
       await checkAuth();
     };
     checkAuthStatus();
-  }, []);
+  }, [pathname]);
 
   const checkAuth = async () => {
     try {
@@ -76,11 +88,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       if (response.ok) {
+        toast.success("Logged in!", {
+          style: toastStyle,
+        });
         const data = await response.json();
         setUser(data.user);
         setIsAuthenticated(true);
         router.push("/feed");
       } else {
+        toast.error("Failed to login", {
+          style: toastStyle,
+        });
         const errorData = await response.json();
         throw new Error(errorData.error || "Login failed");
       }
@@ -92,16 +110,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const logout = async () => {
+    const logoutToast = toast.loading("Logging out...", {
+      style: toastStyle,
+    });
     try {
       const response = await fetch("/api/auth/logout", {
         method: "POST",
       });
 
       if (response.ok) {
+        toast.success("Logged out!", {
+          style: toastStyle,
+          id: logoutToast,
+        });
         setUser(null);
         setIsAuthenticated(false);
         router.push("/login");
       } else {
+        toast.error("Failed to logout", {
+          style: toastStyle,
+          id: logoutToast,
+        });
         throw new Error("Logout failed");
       }
     } catch (error) {
@@ -112,6 +141,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const signup = async (email: string, password: string, username: string) => {
+    const registerToast = toast.loading("Creating account...",{
+      style: toastStyle,
+    });
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -120,8 +152,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       if (response.ok) {
+        toast.success("Account created!", {
+          style: toastStyle,
+          id: registerToast,
+        });
         router.push("/login");
       } else {
+        toast.error("Failed to create account", {
+          style: toastStyle,
+          id: registerToast,
+        });
         const errorData = await response.json();
         throw new Error(errorData.error || "Signup failed");
       }
@@ -145,10 +185,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return { success: true };
       } else {
         const errorData = await response.json();
-        return { success: false, error: errorData.error || "Forgot password failed" };
+        return {
+          success: false,
+          error: errorData.error || "Forgot password failed",
+        };
       }
     } catch (error) {
       console.error("Forgot password error", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (token: string, password: string) => {
+    try {
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password }),
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Password reset successfully" };
+      } else {
+        const errorData = await response.json();
+        return {
+          success: false,
+          message: errorData.error || "Reset password failed",
+        };
+      }
+    } catch (error) {
+      console.error("Reset password error", error);
       throw error;
     } finally {
       setLoading(false);
@@ -166,9 +234,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         signup,
         checkAuth,
         forgotPassword,
+        resetPassword,
       }}
     >
       {children}
+      <Toaster position="top-center" reverseOrder={false} />
     </AuthContext.Provider>
   );
 };
