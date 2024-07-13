@@ -1,10 +1,14 @@
 package com.quantumguys.janun.entity;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -37,22 +41,25 @@ public class Thread extends BaseEntity{
     private long postCount;
     private long tagCount;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "channel_id")
     private Channel channel;
 
     @OneToMany(mappedBy = "thread")
-    private Set<Post> posts = new HashSet<>();
+    private List<Post> posts = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     private Set<Tag> tags = new HashSet<>();
 
     @ManyToMany(mappedBy = "subscribedThreads")
     private Set<AuthUser> subscribers = new HashSet<>();
 
-    @OneToMany(mappedBy = "thread")
-    private Set<Report> reports = new HashSet<>();
+    @OneToMany(mappedBy = "thread", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<Report> reports = new ArrayList<>();
 
+    public boolean isSubscribed(AuthUser user){
+        return this.subscribers.contains(user);
+    }
 
     public void addTag(Tag tag){
         if(this.tags.contains(tag))return;

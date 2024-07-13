@@ -7,10 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ErrorDTO {
+public class GeneralResponseDTO {
     String message;
 
-    public ErrorDTO(String message) {
+    public GeneralResponseDTO(String message) {
         this.message = message;
     }
 }

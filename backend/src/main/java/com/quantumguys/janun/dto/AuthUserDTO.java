@@ -14,6 +14,6 @@ public class AuthUserDTO {
     private ProfileDto profile;
     private String role;
     private boolean emailConfirmed;
-    
+    private boolean premium;
 }
 

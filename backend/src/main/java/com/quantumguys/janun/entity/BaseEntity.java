@@ -12,10 +12,12 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @MappedSuperclass
 public abstract class BaseEntity {
     @Id
@@ -27,9 +29,9 @@ public abstract class BaseEntity {
 
     private LocalDateTime updatedAt;
 
-    private Boolean deleted = false;
-    private Boolean hidden = false;
-    private Boolean premium = false;
+    private boolean deleted = false;
+    private boolean hidden = false;
+    private boolean premium = false;
 
     @PrePersist
     protected void onCreate() {

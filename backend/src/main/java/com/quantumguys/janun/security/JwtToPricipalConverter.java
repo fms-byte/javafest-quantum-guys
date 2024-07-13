@@ -1,5 +1,6 @@
 package com.quantumguys.janun.security;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,11 +13,15 @@ public class JwtToPricipalConverter {
 
     public UserPrincipal convert(DecodedJWT jwt){
         UserPrincipal userPrincipal = new UserPrincipal(jwt.getClaim("username").asString(),jwt.getClaim("email").asString(), Long.valueOf(jwt.getSubject()),null, null);
-        userPrincipal.setAuthorities(getAuthorities(jwt));
-        // print get authorities
-        if(getAuthorities(jwt)==null){
+        
+        List<SimpleGrantedAuthority> authorities = getAuthorities(jwt);
+
+        if(authorities == null){
             System.out.println("Authorities is null");
         }
+        userPrincipal.setAuthorities(authorities);
+
+        // print get authorities
         // System.out.println("User principal created "+userPrincipal.getUsername()+" "+userPrincipal.getEmail()+" "+userPrincipal.getUserId()+" "+userPrincipal.getAuthorities());
         return userPrincipal;
     }
@@ -34,7 +39,18 @@ public class JwtToPricipalConverter {
             System.out.println("Role is null or empty");
             return List.of();
         }
-        return List.of(new SimpleGrantedAuthority(role));
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(role));
+        
+        if(role.equals("ADMIN")){
+            authorities.add(new SimpleGrantedAuthority("MANAGER"));
+            authorities.add(new SimpleGrantedAuthority("USER"));
+        }
+        if(role.equals("MANAGER")){
+            authorities.add(new SimpleGrantedAuthority("USER"));
+        }
+
+        return authorities;
     }
                 
 }

@@ -1,4 +1,5 @@
 package com.quantumguys.janun.controller;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,11 +25,13 @@ public class HelloController {
 	}
 
 	@GetMapping("/test")
+	@PreAuthorize("hasAuthority('MANAGER')")
 	public String test(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 		return "Hello, " + userPrincipal.getEmail() + " " + userPrincipal.getUserId() + "!";
 	}
 
 	@GetMapping("/admin")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public String admin() {
 		return "Welcome to Janun, Admin!";
 	}

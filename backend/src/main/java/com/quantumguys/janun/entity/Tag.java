@@ -6,11 +6,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 public class Tag extends BaseEntity{
 
     @Column(unique = true)
@@ -29,4 +31,13 @@ public class Tag extends BaseEntity{
 
     @ManyToMany(mappedBy = "tags")
     private List<Post> posts;
+
+    public Tag(String name) {
+        this.name = name;
+    }
+    
+    public Tag(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 }

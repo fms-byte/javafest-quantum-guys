@@ -2,7 +2,9 @@ package com.quantumguys.janun.entity;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -16,11 +18,15 @@ public class Comment extends BaseEntity{
 
     private String content;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @OneToMany(mappedBy = "comment")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private AuthUser user;
+
+    @OneToMany(mappedBy = "comment", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Report> reports;
 
     private Long reportsCount;

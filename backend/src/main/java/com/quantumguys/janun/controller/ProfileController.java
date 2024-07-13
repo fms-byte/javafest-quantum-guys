@@ -2,6 +2,7 @@ package com.quantumguys.janun.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.quantumguys.janun.dto.AuthUserDTO;
-import com.quantumguys.janun.dto.ErrorDTO;
+import com.quantumguys.janun.dto.GeneralResponseDTO;
 import com.quantumguys.janun.dto.ProfileDto;
 import com.quantumguys.janun.security.UserPrincipal;
 import com.quantumguys.janun.service.ProfileService;
@@ -35,13 +36,14 @@ public class ProfileController {
     private ProfileService profileService;
 
     @GetMapping("/profile")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get the user's profile", description = "Get the user's profile")
     @ApiResponse(responseCode = "200", description = "Profile retrieved", content = @Content(schema = @Schema(implementation = ProfileDto.class)))
     public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         try {
             return ResponseEntity.ok(profileService.getProfile(userPrincipal.getUsername()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
@@ -52,18 +54,19 @@ public class ProfileController {
         try {
             return ResponseEntity.ok(profileService.getProfile(username));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
     @PostMapping("/profile")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Update the user's profile", description = "Update the user's profile")
     @ApiResponse(responseCode = "200", description = "Profile updated", content = @Content(schema = @Schema(implementation = AuthUserDTO.class)))
     public ResponseEntity<?> updateProfile(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ProfileDto profile) {
         try {
             return ResponseEntity.ok(profileService.updateProfile(userPrincipal.getUsername(), profile));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 }

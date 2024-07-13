@@ -2,6 +2,7 @@ package com.quantumguys.janun.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.quantumguys.janun.dto.AuthUserDTO;
 import com.quantumguys.janun.dto.ChangePasswordDTO;
-import com.quantumguys.janun.dto.ErrorDTO;
+import com.quantumguys.janun.dto.GeneralResponseDTO;
 import com.quantumguys.janun.dto.ForgotPasswordDTO;
 import com.quantumguys.janun.dto.LoginDTO;
 import com.quantumguys.janun.dto.LoginResponseDTO;
@@ -68,7 +69,7 @@ public class AuthController {
             AuthUserDTO user = userService.registerUser(registerDTO);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
@@ -82,11 +83,12 @@ public class AuthController {
             
             return ResponseEntity.ok(responseDTO);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
     @GetMapping("/user")
+    @PreAuthorize("isAuthenticated()")
     @Operation(description = "Get user details if authenticated or throw an exception if not authenticated")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AuthUserDTO.class)))
     public ResponseEntity<?> getUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -95,12 +97,13 @@ public class AuthController {
             AuthUserDTO user = userService.getUser(username);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
 
     @GetMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
     @Operation(description = "Logout the user by deleting the token cookie")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = String.class)))
     public ResponseEntity<?> logoutUser(HttpServletResponse response) {
@@ -108,7 +111,7 @@ public class AuthController {
             deleteCookie(response);
             return ResponseEntity.ok("Logged out successfully");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
     
@@ -120,7 +123,7 @@ public class AuthController {
             userService.forgotPassword(forgotPasswordDTO);
             return ResponseEntity.ok("Password reset link sent to your email");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
@@ -132,11 +135,12 @@ public class AuthController {
             AuthUserDTO user = userService.resetPassword(resetPasswordDTO);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
     @GetMapping("/resend-email")
+    @PreAuthorize("isAuthenticated()")
     @Operation(description = "Resend the confirmation email to the user's email")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = String.class)))
     public ResponseEntity<?> resendConfirmationEmail(@AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -144,7 +148,7 @@ public class AuthController {
             userService.resendConfirmationEmail(userPrincipal.getEmail());
             return ResponseEntity.ok("Confirmation email sent");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
@@ -156,11 +160,12 @@ public class AuthController {
             userService.confirmEmail(token);
             return ResponseEntity.ok("Email confirmed successfully");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
     @PostMapping("/change-password")
+    @PreAuthorize("isAuthenticated()")
     @Operation(description = "Change the user's password")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AuthUserDTO.class)))
     public ResponseEntity<?> changePassword(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ChangePasswordDTO changePasswordDTO) {
@@ -169,7 +174,7 @@ public class AuthController {
             AuthUserDTO user = userService.changePassword(username, changePasswordDTO);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
@@ -181,7 +186,7 @@ public class AuthController {
             UsernameAvailableDTO dto = userService.isUsernameAvailable(username);
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
+            return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
