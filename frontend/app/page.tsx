@@ -1,9 +1,10 @@
 "use client";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
 import Link from "next/link";
+import { useAuthProvider } from "@/lib/contexts/AuthContext";
+import { ArrowUpRight } from "lucide-react";
 
 export default function LandingPage() {
+  const { isAuthenticated } = useAuthProvider();
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-grow">
@@ -17,20 +18,29 @@ export default function LandingPage() {
                 Get real-time updates from government websites, universities,
                 and public institutions in Bangladesh.
               </p>
-              <div className="space-x-4">
-                <Link
-                  href="/register"
-                  className="bg-white text-indigo-700 px-6 py-3 rounded-md font-semibold hover:bg-indigo-100 transition-colors"
-                >
-                  Get Started
+              {isAuthenticated ? (
+                <Link href="/feed" className="inline-block">
+                  <div className="flex items-center bg-white text-indigo-700 px-6 py-3 rounded-full font-semibold hover:bg-indigo-100 transition-colors">
+                    <span>Go to Feed</span>
+                    <ArrowUpRight className="ml-2" />
+                  </div>
                 </Link>
-                <Link
-                  href="/login"
-                  className="bg-transparent border-2 border-white text-white px-6 py-3 rounded-md font-semibold hover:bg-white hover:text-indigo-700 transition-colors"
-                >
-                  Log In
-                </Link>
-              </div>
+              ) : (
+                <div className="space-x-4">
+                  <Link
+                    href="/register"
+                    className="bg-white text-indigo-700 px-6 py-3 rounded-full font-semibold hover:bg-indigo-100 transition-colors"
+                  >
+                    Get Started
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="bg-transparent border-2 border-white text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-indigo-700 transition-colors"
+                  >
+                    Log In
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </section>

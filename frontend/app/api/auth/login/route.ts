@@ -1,4 +1,6 @@
+"use server";
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 const apiUrl = process.env.API_URL;
 
@@ -27,12 +29,21 @@ export async function POST(request: Request) {
 
     const data = await response.json();
 
-    const secureCookie = `token=${data.token}; Path=/; HttpOnly; Secure; SameSite=Strict`;
-    
+    const isSecure = process.env.NODE_ENV === 'production';
+    const cookieOptions = {
+      secure: isSecure,
+      httpOnly: true,
+      sameSite: true,
+      path: '/',
+      maxAge: 86400,
+    }
+
+    cookies().set('token', data.token, cookieOptions);
+
     return NextResponse.json({ user: data.user, token: data.token }, { 
       status: 200,
       headers: {
-        'Set-Cookie': secureCookie
+        'Set-Cookie': `token=${data.token}; ${isSecure ? 'Secure;' : ''} HttpOnly; SameSite=Strict; Path=/; Max-Age=86400;`
       }
     });
 
