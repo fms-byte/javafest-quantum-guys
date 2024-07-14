@@ -1,16 +1,20 @@
 package com.quantumguys.janun.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.quantumguys.janun.dto.GeneralResponseDTO;
+import com.quantumguys.janun.dto.PagePostWrapper;
 import com.quantumguys.janun.security.UserPrincipal;
-import com.quantumguys.janun.dto.*;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @Tag(name = "4. Feed", description = "Endpoints for testing.")

@@ -1,4 +1,14 @@
-# javafest-quantum-guys
+![janun logo](https://github.com/fms-byte/javafest-quantum-guys/blob/main/janun.png?raw=true)
+# Janun
+### The Connector of The Internet
+
+## Technologies Used
+
+### Spring Boot
+![Spring Boot](https://img.icons8.com/color/48/000000/spring-logo.png)
+
+### Next.js
+![Next.js](https://img.icons8.com/color/48/000000/nodejs.png)
 
 ## Team members
 - [Md. Farhan Masud Shohag](https://github.com/fms-byte)

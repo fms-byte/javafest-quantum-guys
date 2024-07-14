@@ -1,6 +1,5 @@
 package com.quantumguys.janun.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,7 +18,6 @@ import com.quantumguys.janun.dto.PageThreadWrapper;
 import com.quantumguys.janun.dto.ThreadCreateDTO;
 import com.quantumguys.janun.dto.ThreadDTO;
 import com.quantumguys.janun.security.UserPrincipal;
-import com.quantumguys.janun.service.ThreadService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,8 +29,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "6. Threads", description = "Endpoints for testing")
 public class ThreadController {
 
-    @Autowired
-    private ThreadService threadService;
+    // @Autowired
+    // private ThreadService threadService;
 
     @GetMapping("/channel/{ChannelSlug}/thread")
     @Operation(summary = "Get Threads", description = "Get all threads in a channel")
