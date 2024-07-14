@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.quantumguys.janun.dto.GeneralResponseDTO;
-import com.quantumguys.janun.dto.PageDTO;
+import com.quantumguys.janun.dto.PagePostWrapper;
+import com.quantumguys.janun.dto.PageThreadWrapper;
 import com.quantumguys.janun.dto.ThreadCreateDTO;
 import com.quantumguys.janun.dto.ThreadDTO;
 import com.quantumguys.janun.security.UserPrincipal;
@@ -27,7 +28,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@Tag(name = "Threads", description = "Endpoints for testing")
+@Tag(name = "6. Threads", description = "Endpoints for testing")
 public class ThreadController {
 
     @Autowired
@@ -35,7 +36,7 @@ public class ThreadController {
 
     @GetMapping("/channel/{ChannelSlug}/thread")
     @Operation(summary = "Get Threads", description = "Get all threads in a channel")
-    @ApiResponse(responseCode = "200", description = "Threads", content = @Content(schema = @Schema(implementation = PageDTO.class)))
+    @ApiResponse(responseCode = "200", description = "Threads", content = @Content(schema = @Schema(implementation = PageThreadWrapper.class)))
     public ResponseEntity<?> getChannels(
                                         @RequestParam(required = false) String search, 
                                         @RequestParam(required = false, defaultValue = "createdAt") String sort, 
@@ -131,7 +132,7 @@ public class ThreadController {
 
     @GetMapping("/channel/{ChannelSlug}/thread/{ThreadSlug}/posts")
     @Operation(summary = "Get Posts", description = "Get all posts in a channel")
-    @ApiResponse(responseCode = "200", description = "Posts", content = @Content(schema = @Schema(implementation = PageDTO.class)))
+    @ApiResponse(responseCode = "200", description = "Posts", content = @Content(schema = @Schema(implementation = PagePostWrapper.class)))
     public ResponseEntity<?> getPostsInChannel(@AuthenticationPrincipal UserPrincipal user,
                                                @PathVariable String slug, 
                                                @RequestParam(required = false) String search, 

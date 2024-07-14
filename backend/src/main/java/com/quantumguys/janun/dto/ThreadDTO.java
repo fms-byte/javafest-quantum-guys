@@ -23,6 +23,5 @@ public class ThreadDTO extends ThreadMinDTO {
     private long tagCount;
     
     private ChannelMinDTO channel;
-    private Set<String> channelLinks = new HashSet<>();
     private Set<TagMinDTO> tags = new HashSet<>();
 }

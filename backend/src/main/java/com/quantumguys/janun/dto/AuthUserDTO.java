@@ -6,14 +6,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AuthUserDTO {
-
-    private String username;
+public class AuthUserDTO extends AuthUserMinDTO {
+    
     private String email;
     private String phone;
-    private ProfileDto profile;
     private String role;
     private boolean emailConfirmed;
-    private boolean premium;
+    
+    private ProfileDto profile;
 }
 

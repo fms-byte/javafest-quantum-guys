@@ -5,25 +5,24 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class PostDTO extends PostMinDTO{
+public class PostCreateDTO {
+    private String title;
     private String content;
+
+    @Schema(description = "Type of the post", allowableValues = {"post"})
+    private String type;
+
+    @Schema(description = "Status of the post", allowableValues = {"draft", "published"})
     private String status;
+    
+    private boolean premium;
 
-    private Long views;
-    private Long likesCount;
-    private Long dislikesCount;
-    private Long commentsCount;
-    private Long sharesCount;
-    private Long reportsCount;
-    private Long tagCount;
-
-    private ThreadMinDTO thread;
-    private ChannelMinDTO channel;
     private Set<TagMinDTO> tags = new HashSet<>();
     private List<MediaMinDTO> media = new ArrayList<>();
 }

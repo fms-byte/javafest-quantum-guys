@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.quantumguys.janun.dto.ChannelCreateDTO;
 import com.quantumguys.janun.dto.ChannelDTO;
 import com.quantumguys.janun.dto.GeneralResponseDTO;
+import com.quantumguys.janun.dto.PageChannelWrapper;
 import com.quantumguys.janun.dto.PageDTO;
+import com.quantumguys.janun.dto.PagePostWrapper;
 import com.quantumguys.janun.entity.Post;
 import com.quantumguys.janun.security.UserPrincipal;
 import com.quantumguys.janun.service.ChannelService;
@@ -31,19 +33,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@Tag(name = "Channel", description = "Channel API\n" +
+@Tag(name = "5. Channel", description = "Channel API\n" +
         "## Public Endpoints:\n" +
         "- **/channel:** Get all channels\n" +
         "- **/channel/{slug}:** Get channel by slug\n" +
         "- **/channel/{slug}/posts:** Get posts in a channel\n" +
         "## Private Endpoints:\n" +
-        "## User\n" +
+        "- ### User\n" +
         "- **/channel/{slug}/subscribe:** Subscribe to a channel\n" +
         "- **/channel/{slug}/unsubscribe:** Unsubscribe from a channel\n"+
-        "## Admin\n" +
+        "- ### Admin\n" +
         "- **/channel:** Create a new channel\n" +
         "- **/channel/{slug}:** Delete a channel\n" +
-        "## Manager\n" +
+        "- ### Manager\n" +
         "- **/channel/{slug}:** Update a channel\n" +
         ""
         )
@@ -54,7 +56,7 @@ public class ChannelController {
 
     @GetMapping("/channel")
     @Operation(summary = "Get Channels", description = "Get all channels")
-    @ApiResponse(responseCode = "200", description = "Channels", content = @Content(schema = @Schema(implementation = PageDTO.class)))
+    @ApiResponse(responseCode = "200", description = "Channels", content = @Content(schema = @Schema(implementation = PageChannelWrapper.class)))
     public ResponseEntity<?> getChannels(
                                         @RequestParam(required = false) String search, 
                                         @RequestParam(required = false, defaultValue = "createdAt") String sort, 
@@ -154,7 +156,7 @@ public class ChannelController {
 
     @GetMapping("/channel/{slug}/posts")
     @Operation(summary = "Get Posts", description = "Get posts in a channel")
-    @ApiResponse(responseCode = "200", description = "Posts", content = @Content(schema = @Schema(implementation = PageDTO.class)))
+    @ApiResponse(responseCode = "200", description = "Posts", content = @Content(schema = @Schema(implementation = PagePostWrapper.class)))
     public ResponseEntity<?> getPostsInChannel(@AuthenticationPrincipal UserPrincipal user,
                                                @PathVariable String slug, 
                                                @RequestParam(required = false) String search, 

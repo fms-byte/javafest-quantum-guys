@@ -6,7 +6,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ChannelMinDTO {
-    private boolean premium;
     private String slug;
     private String name;
+    private boolean premium;
+    private boolean subscribed;
 }

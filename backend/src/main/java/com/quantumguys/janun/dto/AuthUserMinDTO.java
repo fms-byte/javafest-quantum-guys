@@ -5,9 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ThreadMinDTO {
-    private String slug;
-    private String name;
+public class AuthUserMinDTO {
+    private String username;
     private boolean premium;
-    private boolean subscribed;
 }

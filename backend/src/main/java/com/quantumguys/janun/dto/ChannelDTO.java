@@ -8,10 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ChannelDTO {
-    private boolean premium;
-    private String slug;
-    private String name;
+public class ChannelDTO extends ChannelMinDTO {
     private String description;
     private String language;
     private String city;
@@ -28,7 +25,4 @@ public class ChannelDTO {
     private Set<String> links = new HashSet<>();
     private Set<ThreadMinDTO> threads = new HashSet<>();
     private Set<TagMinDTO> tags = new HashSet<>();
-
-
-    private Boolean subscribed;
 }

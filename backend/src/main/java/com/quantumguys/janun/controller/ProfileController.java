@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@Tag(name = "Profile", description = "Endpoints for user profile.\n\n" + 
+@Tag(name = "3. Profile", description = "Endpoints for user profile.\n\n" + 
         "## Public Endpoints:\n" +
         "- **/profile/{username}:** Gets the profile by username.\n" +
         "## Private Endpoints:\n" +

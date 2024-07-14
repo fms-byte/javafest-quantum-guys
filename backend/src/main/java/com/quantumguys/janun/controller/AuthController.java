@@ -36,7 +36,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Auth", description = "Endpoints for user authentication.\n\n" + 
+@Tag(name = "2. Auth", description = "Endpoints for user authentication.\n\n" + 
         "## Public Endpoints:\n" +
         "- **/register:** Registers a new user.\n" +
         "- **/check-username:** Checks if the username is available.\n"+
@@ -74,7 +74,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(description = "Login with (username or email) and password")
+    @Operation(summary = "",description = "Login with (username or email) and password")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginResponseDTO.class)))
     public ResponseEntity<?> loginUser(@RequestBody @Valid LoginDTO loginDTO, HttpServletResponse response) {
         try {
