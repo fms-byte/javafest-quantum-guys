@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
-import { feedData, FeedItem } from "@/lib/db";
+import { feedData, FeedItemProps } from "@/lib/db";
 import { ArrowUpCircle, ArrowDownCircle, MessageCircle } from "lucide-react";
 import ReactionFeedback from "@/components/ReactionComponent";
 
@@ -31,7 +31,7 @@ const PostDetails = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto my-8 p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-3xl mx-auto h-screen my-8 p-6 bg-white shadow-lg rounded-lg">
       <h2 className="text-3xl font-bold mb-4">{post.title}</h2>
       <div className="flex justify-between text-sm text-gray-500 mb-4">
         <span>{post.source}</span>

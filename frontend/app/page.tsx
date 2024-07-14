@@ -28,7 +28,7 @@ export default function LandingPage() {
               ) : (
                 <div className="space-x-4">
                   <Link
-                    href="/register"
+                    href="/feed"
                     className="bg-white text-indigo-700 px-6 py-3 rounded-full font-semibold hover:bg-indigo-100 transition-colors"
                   >
                     Get Started
