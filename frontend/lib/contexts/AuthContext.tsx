@@ -2,6 +2,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import { getUserToken } from "@/lib/actions";
 
 interface User {
   username: string;
@@ -25,6 +26,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
+  userToken: string | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   signup: (email: string, password: string, username: string) => Promise<void>;
@@ -50,12 +52,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userToken, setUserToken] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      await checkAuth();
+      const token = await getUserToken();
+      setUserToken(token);
+      if (token) {
+        setIsAuthenticated(true);
+      }
+      setLoading(false);
     };
     checkAuthStatus();
   }, [pathname]);
@@ -141,7 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const signup = async (email: string, password: string, username: string) => {
-    const registerToast = toast.loading("Creating account...",{
+    const registerToast = toast.loading("Creating account...", {
       style: toastStyle,
     });
     try {
@@ -233,6 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         logout,
         signup,
         checkAuth,
+        userToken,
         forgotPassword,
         resetPassword,
       }}
