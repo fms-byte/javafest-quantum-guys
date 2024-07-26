@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.quantumguys.janun.dto.AuthUserDTO;
 import com.quantumguys.janun.dto.ChangePasswordDTO;
-import com.quantumguys.janun.dto.GeneralResponseDTO;
 import com.quantumguys.janun.dto.ForgotPasswordDTO;
+import com.quantumguys.janun.dto.GeneralResponseDTO;
 import com.quantumguys.janun.dto.LoginDTO;
 import com.quantumguys.janun.dto.LoginResponseDTO;
 import com.quantumguys.janun.dto.RegisterDTO;
@@ -36,7 +36,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "2. Auth", description = "Endpoints for user authentication.\n\n" + 
+@Tag(name = "02. Auth", description = "Endpoints for user authentication.\n\n" + 
         "## Public Endpoints:\n" +
         "- **/register:** Registers a new user.\n" +
         "- **/check-username:** Checks if the username is available.\n"+
@@ -61,6 +61,8 @@ public class AuthController {
 
     @Autowired
     private JwtProperties jwtProperties;
+
+   
 
     @PostMapping("/register")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AuthUserDTO.class)))
@@ -102,14 +104,14 @@ public class AuthController {
     }
 
 
-    @GetMapping("/logout")
+    @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
     @Operation(description = "Logout the user by deleting the token cookie")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = String.class)))
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = GeneralResponseDTO.class)))
     public ResponseEntity<?> logoutUser(HttpServletResponse response) {
         try {
             deleteCookie(response);
-            return ResponseEntity.ok("Logged out successfully");
+            return ResponseEntity.ok(new GeneralResponseDTO("Logged out"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
@@ -117,11 +119,11 @@ public class AuthController {
     
     @PostMapping("/forgot-password")
     @Operation(description = "Send a password reset link to the user's email. Username or email can be used to send the link.")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = String.class)))
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = GeneralResponseDTO.class)))
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordDTO forgotPasswordDTO) {
         try {
             userService.forgotPassword(forgotPasswordDTO);
-            return ResponseEntity.ok("Password reset link sent to your email");
+            return ResponseEntity.ok(new GeneralResponseDTO("Password reset link sent"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
@@ -139,26 +141,26 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/resend-email")
+    @PostMapping("/resend-email")
     @PreAuthorize("isAuthenticated()")
     @Operation(description = "Resend the confirmation email to the user's email")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = String.class)))
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = GeneralResponseDTO.class)))
     public ResponseEntity<?> resendConfirmationEmail(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         try {
             userService.resendConfirmationEmail(userPrincipal.getEmail());
-            return ResponseEntity.ok("Confirmation email sent");
+            return ResponseEntity.ok(new GeneralResponseDTO("Confirmation email sent"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
-    @GetMapping("/confirm")
+    @PostMapping("/confirm")
     @Operation(description = "Confirm the user's email using the token sent to the user's email")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = String.class)))
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = GeneralResponseDTO.class)))
     public ResponseEntity<?> confirmEmail(@RequestParam String token) {
         try {
             userService.confirmEmail(token);
-            return ResponseEntity.ok("Email confirmed successfully");
+            return ResponseEntity.ok(new GeneralResponseDTO("Email confirmed"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
@@ -180,7 +182,7 @@ public class AuthController {
 
     @GetMapping("/check-username")
     @Operation(description = "Check if the username is available")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Boolean.class)))
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = GeneralResponseDTO.class)))
     public ResponseEntity<?> checkUsername(@RequestParam String username) {
         try {
             UsernameAvailableDTO dto = userService.isUsernameAvailable(username);

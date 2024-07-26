@@ -1,7 +1,13 @@
 package com.quantumguys.janun.entity;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import org.modelmapper.ModelMapper;
+
+import com.quantumguys.janun.dto.ChannelMinDTO;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -36,38 +42,21 @@ public class Channel extends BaseEntity {
 
 
     @ElementCollection
-    private Set<String> links = new HashSet<>();
+    private List<String> links = new ArrayList<>();
     
     @OneToMany(mappedBy = "channel", orphanRemoval = true, cascade = CascadeType.ALL)
-    private Set<Thread> threads = new HashSet<>();
+    private List<Thread> threads = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.PERSIST)
     private Set<Tag> tags = new HashSet<>();
-    
 
-    public void addTag(Tag tag){
-        if(this.tags.contains(tag))return;
-        
-        this.tags.add(tag);
-        this.tagCount++;
-        tag.getChannels().add(this);
-        tag.setChannelCount(tag.getChannelCount()+1);
-    }
 
-    public void addTag(Set<Tag> tags){
-        tags.forEach(this::addTag);
-    }
-
-    public void removeTag(Tag tag){
-        if(!this.tags.contains(tag))return;
-        
-        this.tags.remove(tag);
-        this.tagCount--;
-        tag.getChannels().remove(this);
-        tag.setChannelCount(tag.getChannelCount()-1);
-    }
-
-    public void removeTag(Set<Tag> tags){
-        tags.forEach(this::removeTag);
+    public <T> T toDto(boolean isSubscribed, Class<T> clazz) {
+        ModelMapper modelMapper = new ModelMapper();
+        T dto = modelMapper.map(this, clazz);
+        if(dto instanceof ChannelMinDTO){
+            ((ChannelMinDTO) dto).setSubscribed(isSubscribed);
+        }
+        return dto;
     }
 }

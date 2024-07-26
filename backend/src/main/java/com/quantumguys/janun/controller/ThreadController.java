@@ -1,5 +1,9 @@
 package com.quantumguys.janun.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,11 +17,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.quantumguys.janun.dto.GeneralResponseDTO;
+import com.quantumguys.janun.dto.PageDTO;
 import com.quantumguys.janun.dto.PagePostWrapper;
 import com.quantumguys.janun.dto.PageThreadWrapper;
+import com.quantumguys.janun.dto.PostDTO;
 import com.quantumguys.janun.dto.ThreadCreateDTO;
 import com.quantumguys.janun.dto.ThreadDTO;
 import com.quantumguys.janun.security.UserPrincipal;
+import com.quantumguys.janun.service.PostService;
+import com.quantumguys.janun.service.ThreadService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,124 +34,147 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@Tag(name = "6. Threads", description = "Endpoints for testing")
+@Tag(name = "06. Threads", description = "Endpoints for testing")
 public class ThreadController {
 
-    // @Autowired
-    // private ThreadService threadService;
+    @Autowired
+    private ThreadService threadService;
 
-    @GetMapping("/channel/{ChannelSlug}/thread")
+    @Autowired
+    private PostService postService;
+
+    @GetMapping("/channel/{channelSlug}/thread")
     @Operation(summary = "Get Threads", description = "Get all threads in a channel")
     @ApiResponse(responseCode = "200", description = "Threads", content = @Content(schema = @Schema(implementation = PageThreadWrapper.class)))
-    public ResponseEntity<?> getChannels(
-                                        @RequestParam(required = false) String search, 
-                                        @RequestParam(required = false, defaultValue = "createdAt") String sort, 
-                                        @RequestParam(required = false, defaultValue = "asc") String order, 
-                                        @RequestParam(required = false, defaultValue = "0") Integer page
-                                        ){
+    public ResponseEntity<?> getThreads(
+            @AuthenticationPrincipal UserPrincipal user,
+            @PathVariable String channelSlug,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false, defaultValue = "createdAt") String sort,
+            @RequestParam(required = false, defaultValue = "asc") String order,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size) {
+
         try {
-            // Pageable pageable = PageRequest.of(page, 10, Sort.Direction.fromString(order),sort);
-            // PageDTO<ChannelDTO> channels = channelService.getChannels(pageable);
-            return ResponseEntity.ok(null);
+            Pageable pageable = PageRequest.of(page, Math.min(size, 20), Direction.fromString(order), sort);
+            PageDTO<ThreadDTO> threads = threadService.getThreads(getUsername(user), channelSlug, pageable);
+            return ResponseEntity.ok(threads);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
-    @GetMapping("/channel/{ChannelSlug}/thread/{ThreadSlug}")
+    @GetMapping("/channel/{channelSlug}/thread/{threadSlug}")
     @Operation(summary = "Get Thread", description = "Get a thread")
     @ApiResponse(responseCode = "200", description = "Thread", content = @Content(schema = @Schema(implementation = ThreadDTO.class)))
-    public ResponseEntity<?> getChannelBySlug(@PathVariable String slug) {
+    public ResponseEntity<?> getThreadBySlug(
+            @AuthenticationPrincipal UserPrincipal user,
+            @PathVariable String channelSlug, @PathVariable String threadSlug) {
+
         try {
-            // ChannelDTO channel = channelService.getChannel(slug);
-            return ResponseEntity.ok(null);
+            ThreadDTO thread = threadService.getThread(getUsername(user), channelSlug, threadSlug);
+            return ResponseEntity.ok(thread);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
-    @PostMapping("/channel/{ChannelSlug}/thread")
+    @PostMapping("/channel/{channelSlug}/thread")
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Create Thread", description = "Create a thread")
     @ApiResponse(responseCode = "200", description = "Thread", content = @Content(schema = @Schema(implementation = ThreadDTO.class)))
-    public ResponseEntity<?> createChannel(@RequestBody ThreadCreateDTO threadCreateDTO) {
+    public ResponseEntity<?> createThread(
+            @AuthenticationPrincipal UserPrincipal user,
+            @PathVariable String channelSlug,
+            @RequestBody ThreadCreateDTO threadCreateDTO) {
         try {
-            // ChannelDTO channel = channelService.createChannel(channelCreateDTO);
-            return ResponseEntity.ok(null);
+            ThreadDTO thread = threadService.createThread(getUsername(user), channelSlug, threadCreateDTO);
+            return ResponseEntity.ok(thread);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
-    @PutMapping("/channel/{ChannelSlug}/thread/{ThreadSlug}")
-    @PreAuthorize("hasAuthority('ADMIN', 'MANAGER')")
+    @PutMapping("/channel/{channelSlug}/thread/{threadSlug}")
+    @PreAuthorize("hasAuthority('MANAGER')")
     @Operation(summary = "Update Thread", description = "Update a thread")
     @ApiResponse(responseCode = "200", description = "Thread", content = @Content(schema = @Schema(implementation = ThreadDTO.class)))
-    public ResponseEntity<?> updateChannel(@PathVariable String slug, @RequestBody ThreadCreateDTO channelUpdateDTO) {
+    public ResponseEntity<?> updateThread(
+            @AuthenticationPrincipal UserPrincipal user,
+            @PathVariable String channelSlug, @PathVariable String threadSlug,
+            @RequestBody ThreadCreateDTO threadCreateDTO) {
         try {
-            // ChannelDTO channel = channelService.updateChannel(slug, channelUpdateDTO);
-            return ResponseEntity.ok(null);
+            ThreadDTO thread = threadService.updateThread(getUsername(user), channelSlug, threadSlug, threadCreateDTO);
+            return ResponseEntity.ok(thread);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
-    @DeleteMapping("/channel/{ChannelSlug}/thread/{ThreadSlug}")
+    @DeleteMapping("/channel/{channelSlug}/thread/{threadSlug}")
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Delete Thread", description = "Delete a thread")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = GeneralResponseDTO.class)))
-    public ResponseEntity<?> deleteChannel(@PathVariable String slug) {
+    public ResponseEntity<?> deleteChannel(
+            @AuthenticationPrincipal UserPrincipal user,
+            @PathVariable String channelSlug, @PathVariable String threadSlug) {
         try {
-            // channelService.hideChannel(slug);
+            threadService.hideThread(getUsername(user), channelSlug, threadSlug);
             return ResponseEntity.ok().body(new GeneralResponseDTO("Channel hidden successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
-
-    @PostMapping("/channel/{ChannelSlug}/thread/{ThreadSlug}/subscribe")
+    @PostMapping("/channel/{channelSlug}/thread/{threadSlug}/subscribe")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Subscribe to Thread", description = "Subscribe to a thread")
     @ApiResponse(responseCode = "200", description = "Thread", content = @Content(schema = @Schema(implementation = ThreadDTO.class)))
-    public ResponseEntity<?> subscribeToChannel(@PathVariable String slug, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<?> subscribeToChannel(
+            @AuthenticationPrincipal UserPrincipal user,
+            @PathVariable String channelSlug, @PathVariable String threadSlug) {
         try {
-            // ChannelDTO channelDTO = channelService.subscribeChannel(slug, user.getUsername());
-            return ResponseEntity.ok(null);
+            ThreadDTO threadDTO = threadService.subscribeThread(getUsername(user), channelSlug, threadSlug);
+            return ResponseEntity.ok(threadDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
-    @PostMapping("/channel/{ChannelSlug}/thread/{ThreadSlug}/unsubscribe")
+    @PostMapping("/channel/{channelSlug}/thread/{threadSlug}/unsubscribe")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Unsubscribe from Thread", description = "Unsubscribe from a thread")
     @ApiResponse(responseCode = "200", description = "Thread", content = @Content(schema = @Schema(implementation = ThreadDTO.class)))
-    public ResponseEntity<?> unsubscribeFromChannel(@PathVariable String slug, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<?> unsubscribeFromChannel(
+            @AuthenticationPrincipal UserPrincipal user,
+            @PathVariable String channelSlug, @PathVariable String threadSlug) {
         try {
-            // ChannelDTO channelDTO = channelService.unsubscribeChannel(slug, user.getUsername());
-            return ResponseEntity.ok(null);
+            ThreadDTO threadDTO = threadService.unsubscribeThread(getUsername(user), channelSlug, threadSlug);
+            return ResponseEntity.ok(threadDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
     }
 
-    @GetMapping("/channel/{ChannelSlug}/thread/{ThreadSlug}/posts")
+    @GetMapping("/channel/{channelSlug}/thread/{threadSlug}/posts")
     @Operation(summary = "Get Posts", description = "Get all posts in a channel")
     @ApiResponse(responseCode = "200", description = "Posts", content = @Content(schema = @Schema(implementation = PagePostWrapper.class)))
     public ResponseEntity<?> getPostsInChannel(@AuthenticationPrincipal UserPrincipal user,
-                                               @PathVariable String slug, 
-                                               @RequestParam(required = false) String search, 
-                                               @RequestParam(required = false, defaultValue = "createdAt") String sort, 
-                                               @RequestParam(required = false, defaultValue = "asc") String order, 
-                                               @RequestParam(required = false, defaultValue = "0") Integer page) {
+            @PathVariable String channelSlug, @PathVariable String threadSlug,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false, defaultValue = "createdAt") String sort,
+            @RequestParam(required = false, defaultValue = "asc") String order,
+            @RequestParam(required = false, defaultValue = "0") Integer page) {
         try {
-            // Pageable pageable = PageRequest.of(page, 10, Sort.Direction.fromString(order), sort);
-            // String username = user != null ? user.getUsername() : null;
-            // PageDTO<Post> posts = channelService.getPosts(slug,username, pageable);
-            return ResponseEntity.ok(null);
+            Pageable pageable = PageRequest.of(page, 10, Direction.fromString(order), sort);
+            PageDTO<PostDTO> posts = postService.getThreadPosts(getUsername(user), channelSlug, threadSlug, pageable);
+            return ResponseEntity.ok(posts);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
+    }
+
+    private String getUsername(UserPrincipal user) {
+        return user != null ? user.getUsername() : null;
     }
 }

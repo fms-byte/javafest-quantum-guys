@@ -5,6 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.modelmapper.ModelMapper;
+
+import com.quantumguys.janun.dto.PostMinDTO;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,13 +34,13 @@ public class Post extends BaseEntity{
     private String type = "post";
     private String status = "published";
 
-    private Long views;
-    private Long likesCount;
-    private Long dislikesCount;
-    private Long commentsCount;
-    private Long sharesCount;
-    private Long reportsCount;
-    private Long tagCount;
+    private long views;
+    private long likesCount;
+    private long dislikesCount;
+    private long commentsCount;
+    private long sharesCount;
+    private long reportsCount;
+    private long tagCount;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,93 +53,29 @@ public class Post extends BaseEntity{
     @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.DETACH)
     private Set<Tag> tags = new HashSet<>();
 
-    @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Media> media = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Report> reports = new ArrayList<>();
 
-    public void addTag(Tag tag){
-        if(this.tags.contains(tag))return;
+    public <T> T toDto(String reaction, boolean reported, boolean commented, boolean subscribed, Class<T> clazz){
+        ModelMapper modelMapper = new ModelMapper();
+        T dto = modelMapper.map(this, clazz);
         
-        this.tags.add(tag);
-        this.tagCount++;
-        tag.getPosts().add(this);
-        tag.setPostCount(tag.getPostCount()+1);
-    }
-
-    public void addTag(Set<Tag> tags){
-        tags.forEach(this::addTag);
-    }
-
-    public void removeTag(Tag tag){
-        if(!this.tags.contains(tag))return;
-        
-        this.tags.remove(tag);
-        this.tagCount--;
-        tag.getPosts().remove(this);
-        tag.setPostCount(tag.getPostCount()-1);
-    }
-
-    public void removeTag(Set<Tag> tags){
-        tags.forEach(this::removeTag);
-    }
-
-    public void addMedia(Media media){
-        this.media.add(media);
-        media.setPost(this);
-    }
-
-    public void removeMedia(Media media){
-        this.media.remove(media);
-        media.setPost(null);
-    }
-
-    public void addReaction(Reaction reaction){
-        this.reactions.add(reaction);
-        if(reaction.getType().equals("like"))this.likesCount++;
-        if(reaction.getType().equals("dislike"))this.dislikesCount++;
-
-        reaction.setPost(this);
-    }
-
-    public void react(Reaction reaction){
-        Reaction oldReaction = this.reactions.stream().filter(r -> r.getUser().getId().equals(reaction.getUser().getId())).findFirst().orElse(null);
-        if(oldReaction == null){
-            this.addReaction(reaction);
-            return;
+        if(dto instanceof PostMinDTO){
+            PostMinDTO postMinDTO = (PostMinDTO) dto;
+            postMinDTO.setReaction(reaction);
+            postMinDTO.setReacted(reaction!=null);
+            postMinDTO.setReported(reported);
+            postMinDTO.setCommented(commented);
+            postMinDTO.setSubscribed(subscribed);
         }
 
-        if(oldReaction.getType().equals(reaction.getType()))return;
-
-        if(oldReaction.getType().equals("like"))this.likesCount--;
-        if(oldReaction.getType().equals("dislike"))this.dislikesCount--;
-
-        if(reaction.getType().equals("like"))this.likesCount++;
-        if(reaction.getType().equals("dislike"))this.dislikesCount++;
-
-        oldReaction.setType(reaction.getType());
-    }
-
-    public void removeReaction(Reaction reaction){
-        this.reactions.remove(reaction);
-        if(reaction.getType().equals("like"))this.likesCount--;
-        if(reaction.getType().equals("dislike"))this.dislikesCount--;
-
-        reaction.setPost(null);
-    }
-
-    public void addComment(Comment comment){
-        this.comments.add(comment);
-        comment.setPost(this);
-    }
-
-    public void removeComment(Comment comment){
-        this.comments.remove(comment);
-        comment.setPost(null);
+        return dto;
     }
 
 }

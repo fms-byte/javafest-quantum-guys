@@ -12,6 +12,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PostCreateDTO {
+    private String channelSlug;
+    private String threadSlug;
+
     private String title;
     private String content;
 

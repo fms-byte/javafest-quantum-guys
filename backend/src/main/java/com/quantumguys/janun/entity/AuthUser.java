@@ -2,9 +2,7 @@ package com.quantumguys.janun.entity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -50,52 +48,14 @@ public class AuthUser extends BaseEntity{
     private long reportsCount;
 
     @ManyToMany
-    private Set<Thread> subscribedThreads= new HashSet<>();
+    private List<Thread> subscribedThreads= new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     private List<Report> reports = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private Set<Reaction> reactions = new HashSet<>();
+    private List<Reaction> reactions = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     private List<Comment> comments = new ArrayList<>();
-
-
-    public void subscribe(Thread thread){
-        if(this.subscribedThreads.contains(thread))return;
-        if(thread.isPremium() && !this.isPremium())return;
-
-        this.subscribedThreads.add(thread);
-        this.subscribedThreadsCount++;
-        thread.getSubscribers().add(this);
-        thread.setSubscriberCount(thread.getSubscriberCount() + 1);
-    }
-
-    public void subscribe(Channel channel){
-        if(channel.isPremium() && !this.isPremium())return;
-        for (Thread thread : channel.getThreads()) {
-            this.subscribe(thread);
-        }
-    }
-
-    public void unsubscribe(Thread thread){
-        if(!this.subscribedThreads.contains(thread))return;
-        
-        this.subscribedThreads.remove(thread);
-        this.subscribedThreadsCount--;
-        thread.getSubscribers().remove(this);
-        thread.setSubscriberCount(thread.getSubscriberCount() - 1);
-    }
-
-    public void unsubscribe(Channel channel){
-        for (Thread thread : channel.getThreads()) {
-            this.unsubscribe(thread);
-        }
-    }
-
-    public boolean isSubscribed(Thread thread){
-        return this.subscribedThreads.contains(thread);
-    }
-    
 }

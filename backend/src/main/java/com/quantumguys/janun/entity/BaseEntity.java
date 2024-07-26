@@ -46,7 +46,8 @@ public abstract class BaseEntity {
 
     public <T> T toDto(Class<T> clazz) {
         ModelMapper modelMapper = new ModelMapper();
-        return modelMapper.map(this, clazz);
+        T dto = modelMapper.map(this, clazz);
+        return dto;
     }
 
     public void updateFromDto(Object dto) {

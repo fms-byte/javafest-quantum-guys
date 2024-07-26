@@ -22,9 +22,10 @@ import com.quantumguys.janun.dto.GeneralResponseDTO;
 import com.quantumguys.janun.dto.PageChannelWrapper;
 import com.quantumguys.janun.dto.PageDTO;
 import com.quantumguys.janun.dto.PagePostWrapper;
-import com.quantumguys.janun.entity.Post;
+import com.quantumguys.janun.dto.PostDTO;
 import com.quantumguys.janun.security.UserPrincipal;
 import com.quantumguys.janun.service.ChannelService;
+import com.quantumguys.janun.service.PostService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,7 +34,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@Tag(name = "5. Channel", description = "Channel API\n" +
+@Tag(name = "05. Channel", description = "Channel API\n" +
         "## Public Endpoints:\n" +
         "- **/channel:** Get all channels\n" +
         "- **/channel/{slug}:** Get channel by slug\n" +
@@ -54,18 +55,23 @@ public class ChannelController {
     @Autowired
     private ChannelService channelService;
 
+    @Autowired
+    private PostService postService;
+
     @GetMapping("/channel")
     @Operation(summary = "Get Channels", description = "Get all channels")
     @ApiResponse(responseCode = "200", description = "Channels", content = @Content(schema = @Schema(implementation = PageChannelWrapper.class)))
     public ResponseEntity<?> getChannels(
+                                        @AuthenticationPrincipal UserPrincipal user, 
                                         @RequestParam(required = false) String search, 
-                                        @RequestParam(required = false, defaultValue = "createdAt") String sort, 
+                                        @RequestParam(required = false, defaultValue = "name") String sort, 
                                         @RequestParam(required = false, defaultValue = "asc") String order, 
-                                        @RequestParam(required = false, defaultValue = "0") Integer page
+                                        @RequestParam(required = false, defaultValue = "0") Integer page,
+                                        @RequestParam(required = false, defaultValue = "10") Integer size
                                         ){
         try {
-            Pageable pageable = PageRequest.of(page, 10, Sort.Direction.fromString(order),sort);
-            PageDTO<ChannelDTO> channels = channelService.getChannels(pageable);
+            Pageable pageable = PageRequest.of(page, Math.min(20, size), Sort.Direction.fromString(order),sort);
+            PageDTO<ChannelDTO> channels = channelService.getChannels(getUsername(user), pageable);
             return ResponseEntity.ok(channels);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
@@ -75,9 +81,9 @@ public class ChannelController {
     @GetMapping("/channel/{slug}")
     @Operation(summary = "Get Channel", description = "Get channel by slug")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = ChannelDTO.class)))
-    public ResponseEntity<?> getChannelBySlug(@PathVariable String slug) {
+    public ResponseEntity<?> getChannelBySlug(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug) {
         try {
-            ChannelDTO channel = channelService.getChannel(slug);
+            ChannelDTO channel = channelService.getChannel(getUsername(user), slug);
             return ResponseEntity.ok(channel);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
@@ -88,9 +94,9 @@ public class ChannelController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Create Channel", description = "Create a new channel")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = ChannelDTO.class)))
-    public ResponseEntity<?> createChannel(@RequestBody ChannelCreateDTO channelCreateDTO) {
+    public ResponseEntity<?> createChannel(@AuthenticationPrincipal UserPrincipal user, @RequestBody ChannelCreateDTO channelCreateDTO) {
         try {
-            ChannelDTO channel = channelService.createChannel(channelCreateDTO);
+            ChannelDTO channel = channelService.createChannel(getUsername(user), channelCreateDTO);
             return ResponseEntity.ok(channel);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
@@ -98,12 +104,12 @@ public class ChannelController {
     }
 
     @PutMapping("/channel/{slug}")
-    @PreAuthorize("hasAuthority('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     @Operation(summary = "Update Channel", description = "Update a channel")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = ChannelDTO.class)))
-    public ResponseEntity<?> updateChannel(@PathVariable String slug, @RequestBody ChannelCreateDTO channelUpdateDTO) {
+    public ResponseEntity<?> updateChannel(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug, @RequestBody ChannelCreateDTO channelUpdateDTO) {
         try {
-            ChannelDTO channel = channelService.updateChannel(slug, channelUpdateDTO);
+            ChannelDTO channel = channelService.updateChannel(getUsername(user), slug, channelUpdateDTO);
             return ResponseEntity.ok(channel);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
@@ -114,9 +120,9 @@ public class ChannelController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Delete Channel", description = "Delete a channel")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = GeneralResponseDTO.class)))
-    public ResponseEntity<?> deleteChannel(@PathVariable String slug) {
+    public ResponseEntity<?> deleteChannel(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug) {
         try {
-            channelService.hideChannel(slug);
+            channelService.hideChannel(getUsername(user), slug);
             return ResponseEntity.ok().body(new GeneralResponseDTO("Channel hidden successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
@@ -130,9 +136,9 @@ public class ChannelController {
                                                              + "in the channel then nothing will happen. Otherwise, user will be "
                                                              + "subscribed to all threads in the channel.")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = ChannelDTO.class)))
-    public ResponseEntity<?> subscribeToChannel(@PathVariable String slug, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<?> subscribeToChannel(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug) {
         try {
-            ChannelDTO channelDTO = channelService.subscribeChannel(slug, user.getUsername());
+            ChannelDTO channelDTO = channelService.subscribeChannel(getUsername(user), slug);
             return ResponseEntity.ok(channelDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
@@ -145,9 +151,9 @@ public class ChannelController {
                                                                + "in the channel then nothing will happen. Otherwise, user will be "
                                                                + "unsubscribed from all threads in the channel.")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = ChannelDTO.class)))
-    public ResponseEntity<?> unsubscribeFromChannel(@PathVariable String slug, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<?> unsubscribeFromChannel(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug) {
         try {
-            ChannelDTO channelDTO = channelService.unsubscribeChannel(slug, user.getUsername());
+            ChannelDTO channelDTO = channelService.unsubscribeChannel(getUsername(user), slug);
             return ResponseEntity.ok(channelDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
@@ -161,16 +167,21 @@ public class ChannelController {
                                                @PathVariable String slug, 
                                                @RequestParam(required = false) String search, 
                                                @RequestParam(required = false, defaultValue = "createdAt") String sort, 
-                                               @RequestParam(required = false, defaultValue = "asc") String order, 
-                                               @RequestParam(required = false, defaultValue = "0") Integer page) {
+                                               @RequestParam(required = false, defaultValue = "desc") String order, 
+                                               @RequestParam(required = false, defaultValue = "0") Integer page,
+                                               @RequestParam(required = false, defaultValue = "10") Integer size
+                                               ){
         try {
-            Pageable pageable = PageRequest.of(page, 10, Sort.Direction.fromString(order), sort);
-            String username = user != null ? user.getUsername() : null;
-            PageDTO<Post> posts = channelService.getPosts(slug,username, pageable);
+            Pageable pageable = PageRequest.of(page, Math.min(20, size), Sort.Direction.fromString(order), sort);
+            PageDTO<PostDTO> posts = postService.getChannelPosts(getUsername(user), slug, pageable);
             return ResponseEntity.ok(posts);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));
         }
+    }
+
+    private String getUsername(UserPrincipal user) {
+        return user != null ? user.getUsername() : null;
     }
 
 }

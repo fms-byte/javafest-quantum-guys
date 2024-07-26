@@ -8,9 +8,11 @@ import lombok.Setter;
 public class PostMinDTO {
     private String slug;
     private String title;
+    private String createdAt;
+    private String updatedAt;
     private String type;
     private boolean premium;
-    
+
     private String reaction;
     private boolean reacted;
     private boolean reported;

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.quantumguys.janun.dto.AuthUserDTO;
 import com.quantumguys.janun.dto.GeneralResponseDTO;
 import com.quantumguys.janun.dto.ProfileDto;
 import com.quantumguys.janun.security.UserPrincipal;
@@ -23,7 +22,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@Tag(name = "3. Profile", description = "Endpoints for user profile.\n\n" + 
+@Tag(name = "03. Profile", description = "Endpoints for user profile.\n\n" + 
         "## Public Endpoints:\n" +
         "- **/profile/{username}:** Gets the profile by username.\n" +
         "## Private Endpoints:\n" +
@@ -61,7 +60,7 @@ public class ProfileController {
     @PostMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Update the user's profile", description = "Update the user's profile")
-    @ApiResponse(responseCode = "200", description = "Profile updated", content = @Content(schema = @Schema(implementation = AuthUserDTO.class)))
+    @ApiResponse(responseCode = "200", description = "Profile updated", content = @Content(schema = @Schema(implementation = ProfileDto.class)))
     public ResponseEntity<?> updateProfile(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ProfileDto profile) {
         try {
             return ResponseEntity.ok(profileService.updateProfile(userPrincipal.getUsername(), profile));

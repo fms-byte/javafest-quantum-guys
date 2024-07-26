@@ -3,7 +3,6 @@ package com.quantumguys.janun.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.quantumguys.janun.dto.AuthUserDTO;
 import com.quantumguys.janun.dto.ProfileDto;
 import com.quantumguys.janun.entity.AuthUser;
 import com.quantumguys.janun.entity.Profile;
@@ -15,7 +14,7 @@ public class ProfileService {
     @Autowired
     private AuthUserRepository userRepository;
 
-    public AuthUserDTO updateProfile(String username,ProfileDto profile) {
+    public ProfileDto updateProfile(String username,ProfileDto profile) {
         AuthUser user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -25,7 +24,7 @@ public class ProfileService {
         user.setProfile(profileEntity);
         user = userRepository.save(user);
         
-        return user.toDto(AuthUserDTO.class);
+        return user.getProfile().toDto(ProfileDto.class);
     }
 
     public ProfileDto getProfile(String username) {

@@ -45,6 +45,7 @@ public class JwtToPricipalConverter {
         if(role.equals("ADMIN")){
             authorities.add(new SimpleGrantedAuthority("MANAGER"));
             authorities.add(new SimpleGrantedAuthority("USER"));
+            authorities.add(new SimpleGrantedAuthority("BOT"));
         }
         if(role.equals("MANAGER")){
             authorities.add(new SimpleGrantedAuthority("USER"));

@@ -5,6 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.modelmapper.ModelMapper;
+
+import com.quantumguys.janun.dto.ThreadMinDTO;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -35,7 +39,7 @@ public class Thread extends BaseEntity{
     private String cover;
     
     @ElementCollection
-    private Set<String> links = new HashSet<>();
+    private List<String> links = new ArrayList<>();
 
     private long subscriberCount;
     private long postCount;
@@ -51,39 +55,18 @@ public class Thread extends BaseEntity{
     @ManyToMany(cascade = CascadeType.ALL)
     private Set<Tag> tags = new HashSet<>();
 
-    @ManyToMany(mappedBy = "subscribedThreads")
-    private Set<AuthUser> subscribers = new HashSet<>();
+    @ManyToMany(mappedBy = "subscribedThreads", cascade = CascadeType.ALL)
+    private List<AuthUser> subscribers = new ArrayList<>();
 
     @OneToMany(mappedBy = "thread", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Report> reports = new ArrayList<>();
 
-    public boolean isSubscribed(AuthUser user){
-        return this.subscribers.contains(user);
-    }
-
-    public void addTag(Tag tag){
-        if(this.tags.contains(tag))return;
-        
-        this.tags.add(tag);
-        this.tagCount++;
-        tag.getThreads().add(this);
-        tag.setThreadCount(tag.getThreadCount()+1);
-    }
-
-    public void addTag(Set<Tag> tags){
-        tags.forEach(this::addTag);
-    }
-
-    public void removeTag(Tag tag){
-        if(!this.tags.contains(tag))return;
-        
-        this.tags.remove(tag);
-        this.tagCount--;
-        tag.getThreads().remove(this);
-        tag.setThreadCount(tag.getThreadCount()-1);
-    }
-
-    public void removeTag(Set<Tag> tags){
-        tags.forEach(this::removeTag);
+    public <T> T toDto(boolean isSubscribed, Class<T> clazz) {
+        ModelMapper modelMapper = new ModelMapper();
+        T dto = modelMapper.map(this, clazz);
+        if(dto instanceof ThreadMinDTO){
+            ((ThreadMinDTO) dto).setSubscribed(isSubscribed);
+        }
+        return dto;
     }
 }

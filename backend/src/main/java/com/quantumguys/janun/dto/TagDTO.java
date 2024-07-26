@@ -10,5 +10,7 @@ public class TagDTO extends TagMinDTO {
 
     private long postCount;
     private long threadCount;
+    // private Set<ThreadMinDTO> threads = new HashSet<>();
     private long channelCount;
+    // private Set<ChannelMinDTO> channels = new HashSet<>();
 }

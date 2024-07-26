@@ -1,10 +1,13 @@
 package com.quantumguys.janun.entity;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,6 +16,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @NoArgsConstructor
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name"}))
 public class Tag extends BaseEntity{
 
     @Column(unique = true)
@@ -24,13 +28,13 @@ public class Tag extends BaseEntity{
     private long channelCount;
 
     @ManyToMany(mappedBy = "tags")
-    private List<Channel> channels;
+    private Set<Channel> channels = new HashSet<>();
 
     @ManyToMany(mappedBy = "tags")
-    private List<Thread> threads;
+    private Set<Thread> threads = new HashSet<>();
 
     @ManyToMany(mappedBy = "tags")
-    private List<Post> posts;
+    private Set<Post> posts = new HashSet<>();
 
     public Tag(String name) {
         this.name = name;

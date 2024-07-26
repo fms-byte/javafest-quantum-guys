@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class ReportDTO {
     
+    private long id;
     private String reason;
     private String status;
 

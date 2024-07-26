@@ -14,6 +14,9 @@ public class PostDTO extends PostMinDTO{
     private String content;
     private String status;
 
+    private String createdAgo;
+    private String updatedAgo;
+
     private Long views;
     private Long likesCount;
     private Long dislikesCount;
