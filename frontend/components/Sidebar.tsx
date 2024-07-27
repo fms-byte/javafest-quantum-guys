@@ -14,9 +14,9 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-20 w-64 mt-4 lg:mt-0 bg-white shadow-lg transform ${
+      className={`fixed inset-y-0 left-0 z-20 w-[80%] mt-4 lg:mt-0 bg-white shadow-lg transform ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } transition-transform duration-300 lg:relative lg:bg-transparent lg:translate-x-0 lg:w-1/4 lg:shadow-none`}
+      } transition-transform duration-300 lg:relative lg:bg-transparent lg:translate-x-0 lg:w-full lg:shadow-none h-full overflow-y-auto stylish-scrollbar`}
     >
       <div className="flex flex-col h-full p-4">
         <button title="close" onClick={closeSidebar} className="lg:hidden mb-4">
@@ -66,4 +66,4 @@ export default function Sidebar() {
       </div>
     </aside>
   );
-};
+}

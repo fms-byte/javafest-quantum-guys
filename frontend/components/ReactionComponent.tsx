@@ -1,129 +1,66 @@
-"use client";
-import React, { useState } from "react";
-import { ThumbsUp, Heart, Laugh, AlertCircle, Frown, Flame, Send } from "lucide-react";
+// components/ReactionComponent.tsx
+import React from 'react';
+import { MessageCircle, Eye, Share2, Flag, ThumbsUp, ThumbsDown } from "lucide-react";
 
-type Reaction = "like" | "love" | "haha" | "wow" | "sad" | "angry" | null;
-
-interface Comment {
-  id: string;
-  author: string;
-  content: string;
-  timestamp: Date;
+interface ReactionComponentProps {
+  likes: number;
+  dislikes: number;
+  comments: number;
+  views: number;
+  shares: number;
+  reports: number;
+  onReact: (type: 'like' | 'dislike') => void;
 }
 
-const ReactionButton: React.FC<{ 
-  icon: React.ReactNode, 
-  label: string, 
-  isActive: boolean, 
-  onClick: () => void 
-}> = ({ icon, label, isActive, onClick }) => (
-  <button 
-    onClick={onClick}
-    className={`flex flex-col items-center p-2 rounded transition-colors ${
-      isActive ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
-    }`}
-  >
-    {icon}
-    <span className="text-xs mt-1">{label}</span>
-  </button>
-);
-
-const ReactionFeedback: React.FC = () => {
-  const [reaction, setReaction] = useState<Reaction>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState("");
-
-  const handleReaction = (newReaction: Reaction) => {
-    setReaction(prev => prev === newReaction ? null : newReaction);
-  };
-
-  const handleComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newComment.trim()) {
-      const comment: Comment = {
-        id: Date.now().toString(),
-        author: "Current User", // In a real app, get this from authentication
-        content: newComment,
-        timestamp: new Date(),
-      };
-      setComments(prev => [...prev, comment]);
-      setNewComment("");
-    }
-  };
-
+const ReactionComponent: React.FC<ReactionComponentProps> = ({
+  likes,
+  dislikes,
+  comments,
+  views,
+  shares,
+  reports,
+  onReact
+}) => {
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
-      <div className="flex justify-between border-b pb-4">
-        <ReactionButton 
-          icon={<ThumbsUp size={24} />} 
-          label="Like" 
-          isActive={reaction === "like"}
-          onClick={() => handleReaction("like")}
-        />
-        <ReactionButton 
-          icon={<Heart size={24} color="red" />} 
-          label="Love" 
-          isActive={reaction === "love"}
-          onClick={() => handleReaction("love")}
-        />
-        <ReactionButton 
-          icon={<Laugh size={24} color="yellow" />} 
-          label="Haha" 
-          isActive={reaction === "haha"}
-          onClick={() => handleReaction("haha")}
-        />
-        <ReactionButton 
-          icon={<AlertCircle size={24} color="yellow" />} 
-          label="Wow" 
-          isActive={reaction === "wow"}
-          onClick={() => handleReaction("wow")}
-        />
-        <ReactionButton 
-          icon={<Frown size={24} color="yellow" />} 
-          label="Sad" 
-          isActive={reaction === "sad"}
-          onClick={() => handleReaction("sad")}
-        />
-        <ReactionButton 
-          icon={<Flame size={24} color="orange" />} 
-          label="Angry" 
-          isActive={reaction === "angry"}
-          onClick={() => handleReaction("angry")}
-        />
+    <div className="flex items-center justify-between">
+      <div className="flex items-center bg-gray-100 rounded-full shadow-inner">
+        <button 
+          title='Like'
+          onClick={() => onReact('like')} 
+          className="flex items-center space-x-2 text-gray-600 rounded-l-full px-4 py-1 hover:bg-green-200 hover:text-green-600 transition-colors duration-200"
+        >
+          <ThumbsUp className="w-6 h-6"/>
+          <span className="font-semibold">{likes}</span>
+        </button>
+        <button 
+          title='Dislike'
+          onClick={() => onReact('dislike')} 
+          className="flex items-center space-x-2 text-gray-600 rounded-r-full px-4 py-1 hover:bg-red-200 hover:text-red-600 transition-colors duration-200"
+        >
+          <ThumbsDown className="w-6 h-6" />
+          <span className="font-semibold">{dislikes}</span>
+        </button>
       </div>
-
-      <div className="mt-4">
-        <h3 className="font-semibold text-lg mb-2">Comments</h3>
-        {comments.map(comment => (
-          <div key={comment.id} className="bg-gray-50 rounded p-3 mb-2">
-            <div className="font-semibold">{comment.author}</div>
-            <div>{comment.content}</div>
-            <div className="text-xs text-gray-500 mt-1">
-              {comment.timestamp.toLocaleString()}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <form onSubmit={handleComment} className="mt-4">
-        <div className="flex">
-          <input
-            type="text"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write a comment..."
-            className="flex-grow px-3 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
-          />
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600 transition-colors"
-          >
-            <Send size={20} />
-          </button>
+      <div className="flex items-center space-x-6 bg-gray-100 px-4 py-1 rounded-full shadow-inner text-gray-600">
+        <div className="flex items-center space-x-2">
+          <MessageCircle className="w-5 h-5" />
+          <span>{comments}</span>
         </div>
-      </form>
+        <div className="flex items-center space-x-2">
+          <Eye className="w-5 h-5" />
+          <span>{views}</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Share2 className="w-5 h-5" />
+          <span>{shares}</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Flag className="w-5 h-5" />
+          <span>{reports}</span>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default ReactionFeedback;
+export default ReactionComponent;
