@@ -13,6 +13,6 @@ public class AuthUserDTO extends AuthUserMinDTO {
     private String role;
     private boolean emailConfirmed;
     
-    private ProfileDto profile;
+    private ProfileDTO profile;
 }
 

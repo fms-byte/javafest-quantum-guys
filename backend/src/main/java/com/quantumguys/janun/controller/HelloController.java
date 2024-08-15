@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class HelloController {
 
 	@GetMapping("/")
-	public String index(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+	public String testUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 		if(userPrincipal != null) {
 			return "Hello, " + userPrincipal.getUsername() + "! Welcome to Janun!\n"+
 					"Your email is: " + userPrincipal.getEmail() + "\n"+
@@ -26,14 +26,14 @@ public class HelloController {
 
 	@GetMapping("/test")
 	@PreAuthorize("hasAuthority('MANAGER')")
-	public String test(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-		return "Hello, " + userPrincipal.getEmail() + " " + userPrincipal.getUserId() + "!";
+	public String testManager(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+		return "Hello, " + userPrincipal.getUsername() + "! Welcome to Janun! You are a manager!";
 	}
 
 	@GetMapping("/admin")
 	@PreAuthorize("hasAuthority('ADMIN')")
-	public String admin() {
-		return "Welcome to Janun, Admin!";
+	public String testAdmin(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+		return "Hello, " + userPrincipal.getUsername() + "! Welcome to Janun! You are an admin!";
 	}
 	
 }

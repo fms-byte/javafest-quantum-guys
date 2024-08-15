@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.quantumguys.janun.dto.PageDTO;
-import com.quantumguys.janun.dto.TagCreateDTO;
+import com.quantumguys.janun.dto.TagCreateRequestDTO;
 import com.quantumguys.janun.dto.TagDTO;
 import com.quantumguys.janun.entity.Tag;
 import com.quantumguys.janun.repository.TagRepository;
@@ -51,14 +51,14 @@ public class TagService {
         hideTag(tag);
     }
 
-    public TagDTO createTag(TagCreateDTO tagCreateDTO) {
+    public TagDTO createTag(TagCreateRequestDTO tagCreateDTO) {
         Tag tag = new Tag();
         tag.updateFromDto(tagCreateDTO);
         tag = save(tag);
         return tag.toDto(TagDTO.class);
     }
 
-    public TagDTO updateTag(String slug, TagCreateDTO tagCreateDTO) {
+    public TagDTO updateTag(String slug, TagCreateRequestDTO tagCreateDTO) {
         Tag tag = findTag(slug);
         if (tag == null) {
             throw new RuntimeException("Tag not found");

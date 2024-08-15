@@ -5,7 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CommentCreateDTO {
-    private String content;
-    private boolean anonymous;
+public class ReactionsPage extends PageDTO<ReactionDTO>{
+    
 }

@@ -5,6 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PageChannelWrapper extends PageDTO<ChannelDTO>{
-    
+public class TagCreateRequestDTO {
+    private String name;
+    private String description;
 }

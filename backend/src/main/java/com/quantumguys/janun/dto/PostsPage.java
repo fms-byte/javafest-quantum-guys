@@ -5,8 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ReportUpdateDTO {
-
-    private String status;
+public class PostsPage extends PageDTO<PostDTO>{
     
 }

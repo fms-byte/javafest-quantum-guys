@@ -5,8 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ChannelListDTO {
-
-    
+public class ChannelsPage extends PageDTO<ChannelDTO>{
     
 }

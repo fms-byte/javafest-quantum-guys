@@ -1,7 +1,8 @@
 "use server";
 import { NextResponse } from 'next/server';
+import { ApiClient } from "@asfilab/janun-client";
 
-const apiUrl = process.env.API_URL;
+const apiUrl = process.env.API_URL || 'localhost:3000';
 
 if (!apiUrl) {
   throw new Error('API_URL is not defined in environment variables');
@@ -15,21 +16,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email, password, and username are required" }, { status: 400 });
     }
 
-    const response = await fetch(`${apiUrl}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, username }),
+    // const response = await fetch(`${apiUrl}/auth/register`, {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({ email, password, username }),
+    // });
+
+    // if (!response.ok) {
+    //   return NextResponse.json({ error: "Email already exists!" }, { status: response.status });
+    // }
+
+    const apiClient = new ApiClient(apiUrl);
+    const response = await apiClient.auth.register({
+      registerRequest: {
+        email,
+        password,
+        username,
+      },
     });
 
-    if (!response.ok) {
-      return NextResponse.json({ error: "Email already exists!" }, { status: response.status });
-    }
-
-    const data = await response.json();
-
-    console.log(data);
+    console.log(response);
    
-    return NextResponse.json({ user: data.user }, { 
+    return NextResponse.json({ user: response }, { 
       status: 200,
     });
 

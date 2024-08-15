@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.quantumguys.janun.dto.GeneralResponseDTO;
 import com.quantumguys.janun.dto.PageDTO;
-import com.quantumguys.janun.dto.PagePostWrapper;
-import com.quantumguys.janun.dto.PageTagWrapper;
-import com.quantumguys.janun.dto.TagCreateDTO;
+import com.quantumguys.janun.dto.PostsPage;
+import com.quantumguys.janun.dto.TagsPage;
+import com.quantumguys.janun.dto.TagCreateRequestDTO;
 import com.quantumguys.janun.dto.TagDTO;
 import com.quantumguys.janun.security.UserPrincipal;
 import com.quantumguys.janun.service.PostService;
@@ -46,7 +46,7 @@ public class TagController {
     @PreAuthorize("hasAuthority('MANAGER')")
     @Operation(summary = "create tag", description = "tag")
     @ApiResponse(responseCode = "200", description = "test", content = @Content(schema = @Schema(implementation = TagDTO.class)))
-    public ResponseEntity<?> createTag(@RequestBody TagCreateDTO tagCreateDTO) {
+    public ResponseEntity<?> createTag(@RequestBody TagCreateRequestDTO tagCreateDTO) {
         try {
             TagDTO tagDTO = tagService.createTag(tagCreateDTO);
             return ResponseEntity.ok(tagDTO);
@@ -61,7 +61,7 @@ public class TagController {
     @ApiResponse(responseCode = "200", description = "test", content = @Content(schema = @Schema(implementation = TagDTO.class)))
     public ResponseEntity<?> updateTag(
             @RequestParam String slug,
-            @RequestBody TagCreateDTO tagCreateDTO) {
+            @RequestBody TagCreateRequestDTO tagCreateDTO) {
         try {
             TagDTO tagDTO = tagService.updateTag(slug,tagCreateDTO);
             return ResponseEntity.ok(tagDTO);
@@ -85,7 +85,7 @@ public class TagController {
 
     @GetMapping("/tag")
     @Operation(summary = "Get Tags", description = "Get all tags")
-    @ApiResponse(responseCode = "200", description = "Tags", content = @Content(schema = @Schema(implementation = PageTagWrapper.class)))
+    @ApiResponse(responseCode = "200", description = "Tags", content = @Content(schema = @Schema(implementation = TagsPage.class)))
     public ResponseEntity<?> getTags(
             @RequestParam(required = false) String search,
             @RequestParam(required = false, defaultValue = "createdAt") String sort,
@@ -115,8 +115,8 @@ public class TagController {
 
     @GetMapping("/tag/{slug}/posts")
     @Operation(summary = "Get Posts", description = "Get all posts in a tag")
-    @ApiResponse(responseCode = "200", description = "Posts", content = @Content(schema = @Schema(implementation = PagePostWrapper.class)))
-    public ResponseEntity<?> getPosts(
+    @ApiResponse(responseCode = "200", description = "Posts", content = @Content(schema = @Schema(implementation = PostsPage.class)))
+    public ResponseEntity<?> getPostsInTag(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String slug,
             @RequestParam(required = false) String search,

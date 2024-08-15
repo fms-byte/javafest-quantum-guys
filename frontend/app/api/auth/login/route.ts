@@ -1,12 +1,9 @@
 "use server";
 import { NextResponse } from 'next/server';
+import { ApiClient } from "@asfilab/janun-client";
 import { cookies } from 'next/headers';
 
-const apiUrl = process.env.API_URL;
-
-if (!apiUrl) {
-  throw new Error('API_URL is not defined in environment variables');
-}
+const apiUrl = process.env.API_URL || 'localhost:3000';
 
 export async function POST(request: Request) {
   try {
@@ -16,18 +13,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
     }
 
-    const response = await fetch(`${apiUrl}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+    // const response = await fetch(`${apiUrl}/auth/login`, {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({ username, password }),
+    // });
+
+    const apiClient = new ApiClient(apiUrl);
+    const response = await apiClient.auth.login({
+      loginRequest: {
+        username,
+        password,
+      },
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      return NextResponse.json({ error: errorData.message || "Login failed" }, { status: response.status });
-    }
-
-    const data = await response.json();
 
     const isSecure = process.env.NODE_ENV === 'production';
     const cookieOptions = {
@@ -38,17 +36,18 @@ export async function POST(request: Request) {
       maxAge: 86400,
     }
 
-    cookies().set('token', data.token, cookieOptions);
+    if(!response.token) return NextResponse.json({ error: "Token missing!" }, { status: 500 });
+    cookies().set('token', response.token, cookieOptions);
 
-    return NextResponse.json({ user: data.user, token: data.token }, { 
+    return NextResponse.json({ user: response.user, token: response.token }, { 
       status: 200,
       headers: {
-        'Set-Cookie': `token=${data.token}; ${isSecure ? 'Secure;' : ''} HttpOnly; SameSite=Strict; Path=/; Max-Age=86400;`
+        'Set-Cookie': `token=${response.token}; ${isSecure ? 'Secure;' : ''} HttpOnly; SameSite=Strict; Path=/; Max-Age=86400;`
       }
     });
 
-  } catch (error) {
+  } catch (error :any) {
     console.error("Login error", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 });
   }
 }

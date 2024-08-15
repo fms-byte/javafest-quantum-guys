@@ -1,8 +1,5 @@
 package com.quantumguys.janun.service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -15,11 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.quantumguys.janun.dto.ChannelMinDTO;
-import com.quantumguys.janun.dto.CommentCreateDTO;
+import com.quantumguys.janun.dto.CommentCreateRequestDTO;
 import com.quantumguys.janun.dto.CommentDTO;
 import com.quantumguys.janun.dto.MediaMinDTO;
 import com.quantumguys.janun.dto.PageDTO;
-import com.quantumguys.janun.dto.PostCreateDTO;
+import com.quantumguys.janun.dto.PostCreateRequestDTO;
 import com.quantumguys.janun.dto.PostDTO;
 import com.quantumguys.janun.dto.TagMinDTO;
 import com.quantumguys.janun.entity.AuthUser;
@@ -38,7 +35,6 @@ import com.quantumguys.janun.repository.ReactionRepository;
 import com.quantumguys.janun.repository.ReportRepository;
 import com.quantumguys.janun.repository.TagRepository;
 import com.quantumguys.janun.repository.ThreadRepository;
-import com.quantumguys.janun.util.Utility;
 
 @Service
 @Transactional
@@ -68,7 +64,7 @@ public class PostService {
     @Autowired
     private TagRepository tagRepository;
 
-    public PostDTO createPost(String username, PostCreateDTO postCreateDTO) {
+    public PostDTO createPost(String username, PostCreateRequestDTO postCreateDTO) {
         Thread thread = threadRepository
                 .findBySlugAndChannelSlug(postCreateDTO.getThreadSlug(), postCreateDTO.getChannelSlug())
                 .orElseThrow(() -> new RuntimeException("Thread not found"));
@@ -91,7 +87,7 @@ public class PostService {
         return convertToDTO(username, post, channel);
     }
 
-    public PostDTO updatePost(String username, String postSlug, PostCreateDTO postCreateDTO) {
+    public PostDTO updatePost(String username, String postSlug, PostCreateRequestDTO postCreateDTO) {
         Post post = postRepository.findBySlug(postSlug)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
@@ -231,7 +227,7 @@ public class PostService {
         return new PageDTO<CommentDTO>(comments.map(comment -> comment.toDto(CommentDTO.class)));
     }
 
-    public CommentDTO addComment(String username, String postSlug, CommentCreateDTO commentCreateDTO) {
+    public CommentDTO addComment(String username, String postSlug, CommentCreateRequestDTO commentCreateDTO) {
         AuthUser user = authUserRepository.getUser(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -273,13 +269,13 @@ public class PostService {
 
     private PostDTO convertToDTO(String username, Post post, Channel channel) {
         PostDTO postDTO = post.toDto(PostDTO.class);
-        postDTO.setCreatedAt(post.getCreatedAt().format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm")));
-        postDTO.setUpdatedAt(post.getUpdatedAt().format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm")));
+        // postDTO.setCreatedAt(post.getCreatedAt().format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm")));
+        // postDTO.setUpdatedAt(post.getUpdatedAt().format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm")));
 
-        long x = LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(6)) - post.getCreatedAt().toEpochSecond(ZoneOffset.ofHours(6));
-        postDTO.setCreatedAgo(Utility.secToTime(x)+"ago");
-        x = LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(6)) - post.getUpdatedAt().toEpochSecond(ZoneOffset.ofHours(6));
-        postDTO.setUpdatedAgo(Utility.secToTime(x)+"ago");
+        // long x = LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(6)) - post.getCreatedAt().toEpochSecond(ZoneOffset.ofHours(6));
+        // postDTO.setCreatedAgo(Utility.secToTime(x)+"ago");
+        // x = LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(6)) - post.getUpdatedAt().toEpochSecond(ZoneOffset.ofHours(6));
+        // postDTO.setUpdatedAgo(Utility.secToTime(x)+"ago");
 
         postDTO.setChannel(channel.toDto(ChannelMinDTO.class));
         postDTO.getChannel().setSubscribed(channelRepository.isSubscribed(username, channel.getSlug()));
@@ -296,7 +292,7 @@ public class PostService {
         return postDTO;
     }
 
-    private Post updateFromDto(PostCreateDTO postCreateDTO, Thread thread, Channel channel, Post post) {
+    private Post updateFromDto(PostCreateRequestDTO postCreateDTO, Thread thread, Channel channel, Post post) {
         post.setThread(thread);
         post.setTitle(postCreateDTO.getTitle());
         post.setContent(postCreateDTO.getContent());
@@ -326,7 +322,7 @@ public class PostService {
 		return s;
     }
 
-    private Post updateTags(PostCreateDTO postCreateDTO, Post post) {
+    private Post updateTags(PostCreateRequestDTO postCreateDTO, Post post) {
         if (postCreateDTO.getTags() != null) {
             post = removeAllTags(post);
             // get real tags from db
@@ -357,7 +353,7 @@ public class PostService {
         return post;
     }
 
-    private Post updateMedia(PostCreateDTO postCreateDTO, Post post) {
+    private Post updateMedia(PostCreateRequestDTO postCreateDTO, Post post) {
         if (postCreateDTO.getMedia() != null) {
             List<Media> mediaList = new ArrayList<>();
             for (MediaMinDTO mediaMinDTO : postCreateDTO.getMedia()) {

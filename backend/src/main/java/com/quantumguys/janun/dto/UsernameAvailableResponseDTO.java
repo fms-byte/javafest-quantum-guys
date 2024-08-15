@@ -7,12 +7,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class UsernameAvailableDTO {
+public class UsernameAvailableResponseDTO {
     private boolean available;
     private String message;
     private String username;
     
-    public UsernameAvailableDTO(String username, boolean available) {
+    public UsernameAvailableResponseDTO(String username, boolean available) {
         this.username = username;
         this.available = available;
         this.message = available ? username + " is available" : username + " is not available";

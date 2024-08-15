@@ -11,7 +11,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PostCreateDTO {
+public class PostCreateRequestDTO {
     private String channelSlug;
     private String threadSlug;
 

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.quantumguys.janun.dto.GeneralResponseDTO;
-import com.quantumguys.janun.dto.ProfileDto;
+import com.quantumguys.janun.dto.ProfileDTO;
 import com.quantumguys.janun.security.UserPrincipal;
 import com.quantumguys.janun.service.ProfileService;
 
@@ -37,8 +37,8 @@ public class ProfileController {
     @GetMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get the user's profile", description = "Get the user's profile")
-    @ApiResponse(responseCode = "200", description = "Profile retrieved", content = @Content(schema = @Schema(implementation = ProfileDto.class)))
-    public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    @ApiResponse(responseCode = "200", description = "Profile retrieved", content = @Content(schema = @Schema(implementation = ProfileDTO.class)))
+    public ResponseEntity<?> getMyProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         try {
             return ResponseEntity.ok(profileService.getProfile(userPrincipal.getUsername()));
         } catch (Exception e) {
@@ -48,7 +48,7 @@ public class ProfileController {
 
     @GetMapping("/profile/{username}")
     @Operation(summary = "Get the profile by username", description = "Get the profile by username")
-    @ApiResponse(responseCode = "200", description = "Profile retrieved", content = @Content(schema = @Schema(implementation = ProfileDto.class)))
+    @ApiResponse(responseCode = "200", description = "Profile retrieved", content = @Content(schema = @Schema(implementation = ProfileDTO.class)))
     public ResponseEntity<?> getProfileByUsername(@PathVariable String username) {
         try {
             return ResponseEntity.ok(profileService.getProfile(username));
@@ -60,8 +60,8 @@ public class ProfileController {
     @PostMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Update the user's profile", description = "Update the user's profile")
-    @ApiResponse(responseCode = "200", description = "Profile updated", content = @Content(schema = @Schema(implementation = ProfileDto.class)))
-    public ResponseEntity<?> updateProfile(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ProfileDto profile) {
+    @ApiResponse(responseCode = "200", description = "Profile updated", content = @Content(schema = @Schema(implementation = ProfileDTO.class)))
+    public ResponseEntity<?> updateProfile(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ProfileDTO profile) {
         try {
             return ResponseEntity.ok(profileService.updateProfile(userPrincipal.getUsername(), profile));
         } catch (Exception e) {

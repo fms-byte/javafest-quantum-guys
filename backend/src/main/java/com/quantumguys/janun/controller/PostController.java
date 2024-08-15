@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.quantumguys.janun.dto.CommentCreateDTO;
+import com.quantumguys.janun.dto.CommentCreateRequestDTO;
 import com.quantumguys.janun.dto.CommentDTO;
 import com.quantumguys.janun.dto.GeneralResponseDTO;
-import com.quantumguys.janun.dto.PageCommentWrapper;
+import com.quantumguys.janun.dto.CommentsPage;
 import com.quantumguys.janun.dto.PageDTO;
-import com.quantumguys.janun.dto.PagePostWrapper;
-import com.quantumguys.janun.dto.PostCreateDTO;
+import com.quantumguys.janun.dto.PostsPage;
+import com.quantumguys.janun.dto.PostCreateRequestDTO;
 import com.quantumguys.janun.dto.PostDTO;
 import com.quantumguys.janun.security.UserPrincipal;
 import com.quantumguys.janun.service.PostService;
@@ -47,7 +47,7 @@ public class PostController {
     @ApiResponse(responseCode = "200", description = "test", content = @Content(schema = @Schema(implementation = PostDTO.class)))
     public ResponseEntity<?> createPost(
             @AuthenticationPrincipal UserPrincipal user,
-            @RequestBody PostCreateDTO postCreateDTO) {
+            @RequestBody PostCreateRequestDTO postCreateDTO) {
         try {
             PostDTO postDTO = postService.createPost(getUsername(user), postCreateDTO);
             return ResponseEntity.ok(postDTO);
@@ -63,7 +63,7 @@ public class PostController {
     public ResponseEntity<?> updatePost(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String slug,
-            @RequestBody PostCreateDTO postCreateDTO) {
+            @RequestBody PostCreateRequestDTO postCreateDTO) {
         try {
             PostDTO postDTO = postService.updatePost(getUsername(user), slug, postCreateDTO);
             return ResponseEntity.ok(postDTO);
@@ -89,15 +89,16 @@ public class PostController {
 
     @GetMapping("/post")
     @Operation(summary = "get posts", description = "get posts")
-    @ApiResponse(responseCode = "200", description = "test", content = @Content(schema = @Schema(implementation = PagePostWrapper.class)))
+    @ApiResponse(responseCode = "200", description = "test", content = @Content(schema = @Schema(implementation = PostsPage.class)))
     public ResponseEntity<?> getPosts(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestParam(required = false) String search,
             @RequestParam(required = false, defaultValue = "createdAt") String sort,
             @RequestParam(required = false, defaultValue = "desc") String order,
-            @RequestParam(required = false, defaultValue = "0") Integer page) {
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size) {
         try {
-            Pageable pageable = PageRequest.of(page, 10, Direction.fromString(order), sort);
+            Pageable pageable = PageRequest.of(page, size, Direction.fromString(order), sort);
             PageDTO<PostDTO> posts = postService.getPosts(getUsername(user), pageable);
             return ResponseEntity.ok(posts);
         } catch (Exception e) {
@@ -126,8 +127,8 @@ public class PostController {
     public ResponseEntity<?> reactToPost(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String slug,
-            @Parameter(schema = @Schema(allowableValues = { "like", "dislike" }))
-            @RequestParam(required = false) String type) {
+            @Parameter(schema = @Schema(allowableValues = { "like",
+                    "dislike" })) @RequestParam(required = false) String type) {
         try {
             PostDTO postDTO = postService.react(getUsername(user), slug, type);
             return ResponseEntity.ok(postDTO);
@@ -143,7 +144,7 @@ public class PostController {
     public ResponseEntity<?> createComment(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String slug,
-            @RequestBody CommentCreateDTO commentCreateDTO) {
+            @RequestBody CommentCreateRequestDTO commentCreateDTO) {
         try {
             CommentDTO commentDTO = postService.addComment(getUsername(user), slug, commentCreateDTO);
             return ResponseEntity.ok(commentDTO);
@@ -154,7 +155,7 @@ public class PostController {
 
     @GetMapping("/post/{slug}/comment")
     @Operation(summary = "get comments", description = "get comments")
-    @ApiResponse(responseCode = "200", description = "test", content = @Content(schema = @Schema(implementation = PageCommentWrapper.class)))
+    @ApiResponse(responseCode = "200", description = "test", content = @Content(schema = @Schema(implementation = CommentsPage.class)))
     public ResponseEntity<?> getComments(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String slug,
@@ -164,7 +165,7 @@ public class PostController {
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer size) {
         try {
-            Pageable pageable = PageRequest.of(page, Math.min(20, size), Direction.fromString(order), sort);
+            Pageable pageable = PageRequest.of(page, size, Direction.fromString(order), sort);
             PageDTO<CommentDTO> comments = postService.getComments(getUsername(user), slug, pageable);
             return ResponseEntity.ok(comments);
         } catch (Exception e) {
@@ -189,8 +190,8 @@ public class PostController {
 
     @GetMapping("/post/{slug}/my-comments")
     @Operation(summary = "get my comments", description = "get my comments")
-    @ApiResponse(responseCode = "200", description = "test", content = @Content(schema = @Schema(implementation = PageCommentWrapper.class)))
-    public ResponseEntity<?> getMyComments(
+    @ApiResponse(responseCode = "200", description = "test", content = @Content(schema = @Schema(implementation = CommentsPage.class)))
+    public ResponseEntity<?> getMyCommentsInPost(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String slug,
             @RequestParam(required = false) String search,
@@ -199,7 +200,7 @@ public class PostController {
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer size) {
         try {
-            Pageable pageable = PageRequest.of(page, Math.min(20, size), Direction.fromString(order), sort);
+            Pageable pageable = PageRequest.of(page, size, Direction.fromString(order), sort);
             PageDTO<CommentDTO> comments = postService.getMyComments(getUsername(user), slug, pageable);
             return ResponseEntity.ok(comments);
         } catch (Exception e) {

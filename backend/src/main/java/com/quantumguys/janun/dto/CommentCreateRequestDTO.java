@@ -5,6 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PageTagWrapper extends PageDTO<TagDTO>{
-    
+public class CommentCreateRequestDTO {
+    private String content;
+    private boolean anonymous;
 }

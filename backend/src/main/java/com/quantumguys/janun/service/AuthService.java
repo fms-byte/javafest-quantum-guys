@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.quantumguys.janun.dto.AuthUserDTO;
-import com.quantumguys.janun.dto.ChangePasswordDTO;
-import com.quantumguys.janun.dto.ForgotPasswordDTO;
-import com.quantumguys.janun.dto.LoginDTO;
+import com.quantumguys.janun.dto.ChangePasswordRequestDTO;
+import com.quantumguys.janun.dto.ForgotPasswordRequestDTO;
+import com.quantumguys.janun.dto.LoginRequestDTO;
 import com.quantumguys.janun.dto.LoginResponseDTO;
-import com.quantumguys.janun.dto.RegisterDTO;
-import com.quantumguys.janun.dto.ResetPasswordDTO;
-import com.quantumguys.janun.dto.UsernameAvailableDTO;
+import com.quantumguys.janun.dto.RegisterRequestDTO;
+import com.quantumguys.janun.dto.ResetPasswordRequestDTO;
+import com.quantumguys.janun.dto.UsernameAvailableResponseDTO;
 import com.quantumguys.janun.entity.AuthUser;
 import com.quantumguys.janun.repository.AuthUserRepository;
 import com.quantumguys.janun.security.JwtIssuer;
@@ -49,7 +49,7 @@ public class AuthService {
     private EmailService emailService;
 
 
-     public AuthUserDTO registerUser(RegisterDTO registerDTO) {
+     public AuthUserDTO registerUser(RegisterRequestDTO registerDTO) {
         if (userRepository.existsByEmail(registerDTO.getEmail())) {
             throw new RuntimeException("Email already in use");
         }
@@ -71,7 +71,7 @@ public class AuthService {
         return savedUser.toDto(AuthUserDTO.class);
     }
 
-    public LoginResponseDTO loginUser(LoginDTO loginDTO) {
+    public LoginResponseDTO loginUser(LoginRequestDTO loginDTO) {
          var authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword())
         );
@@ -100,7 +100,7 @@ public class AuthService {
         return user.toDto(AuthUserDTO.class);
     }
 
-    public void forgotPassword(ForgotPasswordDTO forgotPasswordDTO) {
+    public void forgotPassword(ForgotPasswordRequestDTO forgotPasswordDTO) {
         AuthUser user = userRepository.findByUsernameOrEmail(forgotPasswordDTO.getEmail(), forgotPasswordDTO.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -108,7 +108,7 @@ public class AuthService {
         emailService.sendPasswordResetEmail(user.getEmail(), token);
     }
 
-    public AuthUserDTO resetPassword(ResetPasswordDTO resetPasswordDTO) {
+    public AuthUserDTO resetPassword(ResetPasswordRequestDTO resetPasswordDTO) {
         JwtPayload jwtPayload = jwtToken.verify(resetPasswordDTO.getToken(), JwtPayload.class);
 
         if(!jwtPayload.getType().equals("resetPassword")) {
@@ -152,7 +152,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public AuthUserDTO changePassword(String username, ChangePasswordDTO changePasswordDTO) {
+    public AuthUserDTO changePassword(String username, ChangePasswordRequestDTO changePasswordDTO) {
         AuthUser user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -167,7 +167,7 @@ public class AuthService {
         return savedUser.toDto(AuthUserDTO.class);
     }
 
-    public UsernameAvailableDTO isUsernameAvailable(String username) {
-        return new UsernameAvailableDTO(username,!userRepository.existsByUsername(username));
+    public UsernameAvailableResponseDTO isUsernameAvailable(String username) {
+        return new UsernameAvailableResponseDTO(username,!userRepository.existsByUsername(username));
     }
 }

@@ -5,6 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PageReactionWrapper extends PageDTO<ReactionDTO>{
+public class ReportUpdateRequestDTO {
+
+    private String status;
     
 }

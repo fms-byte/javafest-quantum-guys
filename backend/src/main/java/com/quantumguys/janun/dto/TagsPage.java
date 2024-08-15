@@ -5,7 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TagCreateDTO {
-    private String name;
-    private String description;
+public class TagsPage extends PageDTO<TagDTO>{
+    
 }

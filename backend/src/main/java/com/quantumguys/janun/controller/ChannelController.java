@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.quantumguys.janun.dto.ChannelCreateDTO;
+import com.quantumguys.janun.dto.ChannelCreateRequestDTO;
 import com.quantumguys.janun.dto.ChannelDTO;
 import com.quantumguys.janun.dto.GeneralResponseDTO;
-import com.quantumguys.janun.dto.PageChannelWrapper;
+import com.quantumguys.janun.dto.ChannelsPage;
 import com.quantumguys.janun.dto.PageDTO;
-import com.quantumguys.janun.dto.PagePostWrapper;
+import com.quantumguys.janun.dto.PostsPage;
 import com.quantumguys.janun.dto.PostDTO;
 import com.quantumguys.janun.security.UserPrincipal;
 import com.quantumguys.janun.service.ChannelService;
@@ -60,7 +60,7 @@ public class ChannelController {
 
     @GetMapping("/channel")
     @Operation(summary = "Get Channels", description = "Get all channels")
-    @ApiResponse(responseCode = "200", description = "Channels", content = @Content(schema = @Schema(implementation = PageChannelWrapper.class)))
+    @ApiResponse(responseCode = "200", description = "Channels", content = @Content(schema = @Schema(implementation = ChannelsPage.class)))
     public ResponseEntity<?> getChannels(
                                         @AuthenticationPrincipal UserPrincipal user, 
                                         @RequestParam(required = false) String search, 
@@ -81,7 +81,7 @@ public class ChannelController {
     @GetMapping("/channel/{slug}")
     @Operation(summary = "Get Channel", description = "Get channel by slug")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = ChannelDTO.class)))
-    public ResponseEntity<?> getChannelBySlug(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug) {
+    public ResponseEntity<?> getChannel(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug) {
         try {
             ChannelDTO channel = channelService.getChannel(getUsername(user), slug);
             return ResponseEntity.ok(channel);
@@ -94,7 +94,7 @@ public class ChannelController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Create Channel", description = "Create a new channel")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = ChannelDTO.class)))
-    public ResponseEntity<?> createChannel(@AuthenticationPrincipal UserPrincipal user, @RequestBody ChannelCreateDTO channelCreateDTO) {
+    public ResponseEntity<?> createChannel(@AuthenticationPrincipal UserPrincipal user, @RequestBody ChannelCreateRequestDTO channelCreateDTO) {
         try {
             ChannelDTO channel = channelService.createChannel(getUsername(user), channelCreateDTO);
             return ResponseEntity.ok(channel);
@@ -107,7 +107,7 @@ public class ChannelController {
     @PreAuthorize("hasAuthority('MANAGER')")
     @Operation(summary = "Update Channel", description = "Update a channel")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = ChannelDTO.class)))
-    public ResponseEntity<?> updateChannel(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug, @RequestBody ChannelCreateDTO channelUpdateDTO) {
+    public ResponseEntity<?> updateChannel(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug, @RequestBody ChannelCreateRequestDTO channelUpdateDTO) {
         try {
             ChannelDTO channel = channelService.updateChannel(getUsername(user), slug, channelUpdateDTO);
             return ResponseEntity.ok(channel);
@@ -136,7 +136,7 @@ public class ChannelController {
                                                              + "in the channel then nothing will happen. Otherwise, user will be "
                                                              + "subscribed to all threads in the channel.")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = ChannelDTO.class)))
-    public ResponseEntity<?> subscribeToChannel(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug) {
+    public ResponseEntity<?> subscribeChannel(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug) {
         try {
             ChannelDTO channelDTO = channelService.subscribeChannel(getUsername(user), slug);
             return ResponseEntity.ok(channelDTO);
@@ -151,7 +151,7 @@ public class ChannelController {
                                                                + "in the channel then nothing will happen. Otherwise, user will be "
                                                                + "unsubscribed from all threads in the channel.")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = ChannelDTO.class)))
-    public ResponseEntity<?> unsubscribeFromChannel(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug) {
+    public ResponseEntity<?> unsubscribeChannel(@AuthenticationPrincipal UserPrincipal user, @PathVariable String slug) {
         try {
             ChannelDTO channelDTO = channelService.unsubscribeChannel(getUsername(user), slug);
             return ResponseEntity.ok(channelDTO);
@@ -162,7 +162,7 @@ public class ChannelController {
 
     @GetMapping("/channel/{slug}/posts")
     @Operation(summary = "Get Posts", description = "Get posts in a channel")
-    @ApiResponse(responseCode = "200", description = "Posts", content = @Content(schema = @Schema(implementation = PagePostWrapper.class)))
+    @ApiResponse(responseCode = "200", description = "Posts", content = @Content(schema = @Schema(implementation = PostsPage.class)))
     public ResponseEntity<?> getPostsInChannel(@AuthenticationPrincipal UserPrincipal user,
                                                @PathVariable String slug, 
                                                @RequestParam(required = false) String search, 

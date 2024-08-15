@@ -5,15 +5,15 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ChangePasswordDTO {
+public class ChangePasswordRequestDTO {
 
     private String oldPassword;
     private String newPassword;
 
-    public ChangePasswordDTO() {
+    public ChangePasswordRequestDTO() {
     }
 
-    public ChangePasswordDTO(String oldPassword, String newPassword) {
+    public ChangePasswordRequestDTO(String oldPassword, String newPassword) {
         this.oldPassword = oldPassword;
         this.newPassword = newPassword;
     }

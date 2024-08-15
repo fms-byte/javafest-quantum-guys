@@ -5,6 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PageThreadWrapper extends PageDTO<ThreadDTO>{
+public class CommentsPage extends PageDTO<CommentDTO>{
     
 }

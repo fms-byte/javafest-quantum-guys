@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.quantumguys.janun.dto.GeneralResponseDTO;
 import com.quantumguys.janun.dto.PageDTO;
-import com.quantumguys.janun.dto.PageReportWrapper;
-import com.quantumguys.janun.dto.ReportCreateDTO;
+import com.quantumguys.janun.dto.ReportsPage;
+import com.quantumguys.janun.dto.ReportCreateRequestDTO;
 import com.quantumguys.janun.dto.ReportDTO;
-import com.quantumguys.janun.dto.ReportUpdateDTO;
+import com.quantumguys.janun.dto.ReportUpdateRequestDTO;
 import com.quantumguys.janun.security.UserPrincipal;
 import com.quantumguys.janun.service.ReportService;
 
@@ -42,7 +42,7 @@ public class ReportController {
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "create report", description = "create report")
     @ApiResponse(responseCode = "200", description = "test", content = @Content(schema = @Schema(implementation = ReportDTO.class)))
-    public ResponseEntity<?> createReport( @AuthenticationPrincipal UserPrincipal user, @RequestBody ReportCreateDTO reportCreateDTO) {
+    public ResponseEntity<?> createReport( @AuthenticationPrincipal UserPrincipal user, @RequestBody ReportCreateRequestDTO reportCreateDTO) {
         try {
             ReportDTO reportDTO = reportService.report(getUsername(user), reportCreateDTO);
             return ResponseEntity.ok(reportDTO);
@@ -58,7 +58,7 @@ public class ReportController {
     public ResponseEntity<?> updateReport( 
                                             @AuthenticationPrincipal UserPrincipal user,
                                             @PathVariable long id,
-                                            @RequestBody ReportUpdateDTO reportUpdateDTO
+                                            @RequestBody ReportUpdateRequestDTO reportUpdateDTO
                                             ) {
         try {
             ReportDTO reportDTO = reportService.updateReport(id, reportUpdateDTO);
@@ -84,7 +84,7 @@ public class ReportController {
     @GetMapping("/report")
     @PreAuthorize("hasAuthority('MANAGER')")
     @Operation(summary = "Get Reports", description = "Get all reports")
-    @ApiResponse(responseCode = "200", description = "Reports", content = @Content(schema = @Schema(implementation = PageReportWrapper.class)))
+    @ApiResponse(responseCode = "200", description = "Reports", content = @Content(schema = @Schema(implementation = ReportsPage.class)))
     public ResponseEntity<?> getReports(
                                         @AuthenticationPrincipal UserPrincipal user,
                                         @RequestParam(required = false) String search, 

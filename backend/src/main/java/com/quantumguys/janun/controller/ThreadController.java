@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.quantumguys.janun.dto.GeneralResponseDTO;
 import com.quantumguys.janun.dto.PageDTO;
-import com.quantumguys.janun.dto.PagePostWrapper;
-import com.quantumguys.janun.dto.PageThreadWrapper;
+import com.quantumguys.janun.dto.PostsPage;
+import com.quantumguys.janun.dto.ThreadsPage;
 import com.quantumguys.janun.dto.PostDTO;
-import com.quantumguys.janun.dto.ThreadCreateDTO;
+import com.quantumguys.janun.dto.ThreadCreateRequestDTO;
 import com.quantumguys.janun.dto.ThreadDTO;
 import com.quantumguys.janun.security.UserPrincipal;
 import com.quantumguys.janun.service.PostService;
@@ -45,7 +45,7 @@ public class ThreadController {
 
     @GetMapping("/channel/{channelSlug}/thread")
     @Operation(summary = "Get Threads", description = "Get all threads in a channel")
-    @ApiResponse(responseCode = "200", description = "Threads", content = @Content(schema = @Schema(implementation = PageThreadWrapper.class)))
+    @ApiResponse(responseCode = "200", description = "Threads", content = @Content(schema = @Schema(implementation = ThreadsPage.class)))
     public ResponseEntity<?> getThreads(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String channelSlug,
@@ -67,7 +67,7 @@ public class ThreadController {
     @GetMapping("/channel/{channelSlug}/thread/{threadSlug}")
     @Operation(summary = "Get Thread", description = "Get a thread")
     @ApiResponse(responseCode = "200", description = "Thread", content = @Content(schema = @Schema(implementation = ThreadDTO.class)))
-    public ResponseEntity<?> getThreadBySlug(
+    public ResponseEntity<?> getThread(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String channelSlug, @PathVariable String threadSlug) {
 
@@ -86,7 +86,7 @@ public class ThreadController {
     public ResponseEntity<?> createThread(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String channelSlug,
-            @RequestBody ThreadCreateDTO threadCreateDTO) {
+            @RequestBody ThreadCreateRequestDTO threadCreateDTO) {
         try {
             ThreadDTO thread = threadService.createThread(getUsername(user), channelSlug, threadCreateDTO);
             return ResponseEntity.ok(thread);
@@ -102,7 +102,7 @@ public class ThreadController {
     public ResponseEntity<?> updateThread(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String channelSlug, @PathVariable String threadSlug,
-            @RequestBody ThreadCreateDTO threadCreateDTO) {
+            @RequestBody ThreadCreateRequestDTO threadCreateDTO) {
         try {
             ThreadDTO thread = threadService.updateThread(getUsername(user), channelSlug, threadSlug, threadCreateDTO);
             return ResponseEntity.ok(thread);
@@ -115,7 +115,7 @@ public class ThreadController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(summary = "Delete Thread", description = "Delete a thread")
     @ApiResponse(responseCode = "200", description = "Channel", content = @Content(schema = @Schema(implementation = GeneralResponseDTO.class)))
-    public ResponseEntity<?> deleteChannel(
+    public ResponseEntity<?> deleteThread(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String channelSlug, @PathVariable String threadSlug) {
         try {
@@ -130,7 +130,7 @@ public class ThreadController {
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Subscribe to Thread", description = "Subscribe to a thread")
     @ApiResponse(responseCode = "200", description = "Thread", content = @Content(schema = @Schema(implementation = ThreadDTO.class)))
-    public ResponseEntity<?> subscribeToChannel(
+    public ResponseEntity<?> subscribeThread(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String channelSlug, @PathVariable String threadSlug) {
         try {
@@ -145,7 +145,7 @@ public class ThreadController {
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Unsubscribe from Thread", description = "Unsubscribe from a thread")
     @ApiResponse(responseCode = "200", description = "Thread", content = @Content(schema = @Schema(implementation = ThreadDTO.class)))
-    public ResponseEntity<?> unsubscribeFromChannel(
+    public ResponseEntity<?> unsubscribeThread(
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable String channelSlug, @PathVariable String threadSlug) {
         try {
@@ -158,8 +158,8 @@ public class ThreadController {
 
     @GetMapping("/channel/{channelSlug}/thread/{threadSlug}/posts")
     @Operation(summary = "Get Posts", description = "Get all posts in a channel")
-    @ApiResponse(responseCode = "200", description = "Posts", content = @Content(schema = @Schema(implementation = PagePostWrapper.class)))
-    public ResponseEntity<?> getPostsInChannel(@AuthenticationPrincipal UserPrincipal user,
+    @ApiResponse(responseCode = "200", description = "Posts", content = @Content(schema = @Schema(implementation = PostsPage.class)))
+    public ResponseEntity<?> getPostsInThread(@AuthenticationPrincipal UserPrincipal user,
             @PathVariable String channelSlug, @PathVariable String threadSlug,
             @RequestParam(required = false) String search,
             @RequestParam(required = false, defaultValue = "createdAt") String sort,

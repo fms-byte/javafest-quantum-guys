@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ReportCreateDTO {
+public class ReportCreateRequestDTO {
     private String reason;
     
     @Schema(description = "Type of the report", allowableValues = {"post", "comment", "thread"})

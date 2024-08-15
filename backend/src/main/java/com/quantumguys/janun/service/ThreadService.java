@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.quantumguys.janun.dto.PageDTO;
 import com.quantumguys.janun.dto.TagMinDTO;
-import com.quantumguys.janun.dto.ThreadCreateDTO;
+import com.quantumguys.janun.dto.ThreadCreateRequestDTO;
 import com.quantumguys.janun.dto.ThreadDTO;
 import com.quantumguys.janun.entity.AuthUser;
 import com.quantumguys.janun.entity.Channel;
@@ -39,7 +39,7 @@ public class ThreadService {
     @Autowired
     private TagRepository tagRepository;
 
-    public ThreadDTO createThread(String username, String channelSlug, ThreadCreateDTO threadCreateDTO) {
+    public ThreadDTO createThread(String username, String channelSlug, ThreadCreateRequestDTO threadCreateDTO) {
         if (threadRepository.existsBySlugAndChannelSlug(threadCreateDTO.getSlug(), channelSlug)) {
             throw new RuntimeException("Thread already exists with this slug");
         }
@@ -73,7 +73,7 @@ public class ThreadService {
         return convertToDto(username, thread);
     }
 
-    public ThreadDTO updateThread(String username, String channelSlug, String slug, ThreadCreateDTO threadCreateDTO) {
+    public ThreadDTO updateThread(String username, String channelSlug, String slug, ThreadCreateRequestDTO threadCreateDTO) {
         Thread thread = threadRepository.findBySlugAndChannelSlug(slug, channelSlug)
                 .orElseThrow(() -> new RuntimeException("Thread not found"));
 

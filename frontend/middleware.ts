@@ -39,7 +39,7 @@ export default async function AuthMiddleware(
       token &&
       publicRoutes.some((path) => req.nextUrl.pathname.startsWith(path))
     ) {
-      return NextResponse.redirect(`${appUrl}/feed`);
+      return NextResponse.redirect(`${appUrl}`);
     }
   }
 }

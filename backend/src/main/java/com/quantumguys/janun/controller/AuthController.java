@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.quantumguys.janun.dto.AuthUserDTO;
-import com.quantumguys.janun.dto.ChangePasswordDTO;
-import com.quantumguys.janun.dto.ForgotPasswordDTO;
+import com.quantumguys.janun.dto.ChangePasswordRequestDTO;
+import com.quantumguys.janun.dto.ForgotPasswordRequestDTO;
 import com.quantumguys.janun.dto.GeneralResponseDTO;
-import com.quantumguys.janun.dto.LoginDTO;
+import com.quantumguys.janun.dto.LoginRequestDTO;
 import com.quantumguys.janun.dto.LoginResponseDTO;
-import com.quantumguys.janun.dto.RegisterDTO;
-import com.quantumguys.janun.dto.ResetPasswordDTO;
-import com.quantumguys.janun.dto.UsernameAvailableDTO;
+import com.quantumguys.janun.dto.RegisterRequestDTO;
+import com.quantumguys.janun.dto.ResetPasswordRequestDTO;
+import com.quantumguys.janun.dto.UsernameAvailableResponseDTO;
 import com.quantumguys.janun.security.JwtProperties;
 import com.quantumguys.janun.security.UserPrincipal;
 import com.quantumguys.janun.service.AuthService;
@@ -66,7 +66,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AuthUserDTO.class)))
-    public ResponseEntity<?> registerUser(@RequestBody @Valid RegisterDTO registerDTO) {
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequestDTO registerDTO) {
         try {
             AuthUserDTO user = userService.registerUser(registerDTO);
             return ResponseEntity.ok(user);
@@ -78,7 +78,7 @@ public class AuthController {
     @PostMapping("/login")
     @Operation(summary = "",description = "Login with (username or email) and password")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginResponseDTO.class)))
-    public ResponseEntity<?> loginUser(@RequestBody @Valid LoginDTO loginDTO, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginDTO, HttpServletResponse response) {
         try {
             LoginResponseDTO responseDTO = userService.loginUser(loginDTO);
             addCookie(response, responseDTO.getToken());
@@ -108,7 +108,7 @@ public class AuthController {
     @PreAuthorize("isAuthenticated()")
     @Operation(description = "Logout the user by deleting the token cookie")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = GeneralResponseDTO.class)))
-    public ResponseEntity<?> logoutUser(HttpServletResponse response) {
+    public ResponseEntity<?> logout(HttpServletResponse response) {
         try {
             deleteCookie(response);
             return ResponseEntity.ok(new GeneralResponseDTO("Logged out"));
@@ -120,7 +120,7 @@ public class AuthController {
     @PostMapping("/forgot-password")
     @Operation(description = "Send a password reset link to the user's email. Username or email can be used to send the link.")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = GeneralResponseDTO.class)))
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordDTO forgotPasswordDTO) {
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequestDTO forgotPasswordDTO) {
         try {
             userService.forgotPassword(forgotPasswordDTO);
             return ResponseEntity.ok(new GeneralResponseDTO("Password reset link sent"));
@@ -132,7 +132,7 @@ public class AuthController {
     @PostMapping("/reset-password")
     @Operation(description = "Reset the user's password using the token sent to the user's email")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AuthUserDTO.class)))
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequestDTO resetPasswordDTO) {
         try {
             AuthUserDTO user = userService.resetPassword(resetPasswordDTO);
             return ResponseEntity.ok(user);
@@ -170,7 +170,7 @@ public class AuthController {
     @PreAuthorize("isAuthenticated()")
     @Operation(description = "Change the user's password")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AuthUserDTO.class)))
-    public ResponseEntity<?> changePassword(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ChangePasswordDTO changePasswordDTO) {
+    public ResponseEntity<?> changePassword(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ChangePasswordRequestDTO changePasswordDTO) {
         try {
             String username = userPrincipal.getUsername();
             AuthUserDTO user = userService.changePassword(username, changePasswordDTO);
@@ -182,10 +182,10 @@ public class AuthController {
 
     @GetMapping("/check-username")
     @Operation(description = "Check if the username is available")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = GeneralResponseDTO.class)))
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UsernameAvailableResponseDTO.class)))
     public ResponseEntity<?> checkUsername(@RequestParam String username) {
         try {
-            UsernameAvailableDTO dto = userService.isUsernameAvailable(username);
+            UsernameAvailableResponseDTO dto = userService.isUsernameAvailable(username);
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new GeneralResponseDTO(e.getMessage()));

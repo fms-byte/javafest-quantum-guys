@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RegisterDTO {
+public class RegisterRequestDTO {
 
     @NotEmpty(message = "Username is required")
     @Size(min = 3, max = 20, message = "Username should have between 3 and 20 characters")
@@ -22,7 +22,7 @@ public class RegisterDTO {
     @Size(min = 6, max = 20, message = "Password should have between 6 and 20 characters")
     private String password;
 
-    public RegisterDTO() {
+    public RegisterRequestDTO() {
     }
 
 }

@@ -5,14 +5,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ForgotPasswordDTO {
+public class ForgotPasswordRequestDTO {
 
     private String email;
 
-    public ForgotPasswordDTO() {
+    public ForgotPasswordRequestDTO() {
     }
 
-    public ForgotPasswordDTO(String email) {
+    public ForgotPasswordRequestDTO(String email) {
         this.email = email;
     }
 }

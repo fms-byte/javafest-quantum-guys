@@ -7,9 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.quantumguys.janun.dto.PageDTO;
 import com.quantumguys.janun.dto.PostMinDTO;
-import com.quantumguys.janun.dto.ReportCreateDTO;
+import com.quantumguys.janun.dto.ReportCreateRequestDTO;
 import com.quantumguys.janun.dto.ReportDTO;
-import com.quantumguys.janun.dto.ReportUpdateDTO;
+import com.quantumguys.janun.dto.ReportUpdateRequestDTO;
 import com.quantumguys.janun.dto.ThreadMinDTO;
 import com.quantumguys.janun.entity.AuthUser;
 import com.quantumguys.janun.entity.Comment;
@@ -45,7 +45,7 @@ public class ReportService {
         @Autowired
         private ReactionRepository reactionRepository;
 
-        public ReportDTO reportPost(String username, ReportCreateDTO reportCreateDTO) {
+        public ReportDTO reportPost(String username, ReportCreateRequestDTO reportCreateDTO) {
                 AuthUser user = authUserRepository.getUser(username)
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -61,7 +61,7 @@ public class ReportService {
                 return convertToDto(username, savedReport);
         }
 
-        public ReportDTO reportComment(String username, ReportCreateDTO reportCreateDTO) {
+        public ReportDTO reportComment(String username, ReportCreateRequestDTO reportCreateDTO) {
                 AuthUser user = authUserRepository.getUser(username)
                                 .orElseThrow(() -> new RuntimeException("User not found"));
                 Comment comment = commentRepository.getCommentEntity(reportCreateDTO.getCommentId())
@@ -76,7 +76,7 @@ public class ReportService {
                 return convertToDto(username, savedReport);
         }
 
-        public ReportDTO reportThread(String username, ReportCreateDTO reportCreateDTO) {
+        public ReportDTO reportThread(String username, ReportCreateRequestDTO reportCreateDTO) {
                 AuthUser user = authUserRepository.getUser(username)
                                 .orElseThrow(() -> new RuntimeException("User not found"));
                 Thread thread = threadRepository
@@ -92,7 +92,7 @@ public class ReportService {
                 return convertToDto(username, savedReport);
         }
 
-        public ReportDTO report(String username, ReportCreateDTO reportCreateDTO) {
+        public ReportDTO report(String username, ReportCreateRequestDTO reportCreateDTO) {
                 if (reportCreateDTO.getType().equals("post")) {
                         return reportPost(username, reportCreateDTO);
                 } else if (reportCreateDTO.getType().equals("comment")) {
@@ -101,7 +101,7 @@ public class ReportService {
                         return reportThread(username, reportCreateDTO);
         }
 
-        public ReportDTO updateReport(long reportId, ReportUpdateDTO reportUpdateDTO) {
+        public ReportDTO updateReport(long reportId, ReportUpdateRequestDTO reportUpdateDTO) {
                 Report report = reportRepository.findById(reportId)
                                 .orElseThrow(() -> new RuntimeException("Report not found"));
 

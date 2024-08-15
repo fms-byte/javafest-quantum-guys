@@ -5,14 +5,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ResetPasswordDTO {
+public class ResetPasswordRequestDTO {
     private String token;
     private String password;
 
-    public ResetPasswordDTO() {
+    public ResetPasswordRequestDTO() {
     }
 
-    public ResetPasswordDTO(String token, String password) {
+    public ResetPasswordRequestDTO(String token, String password) {
         this.token = token;
         this.password = password;
     }

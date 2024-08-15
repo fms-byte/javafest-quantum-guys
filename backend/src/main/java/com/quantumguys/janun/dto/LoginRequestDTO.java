@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LoginDTO {
+public class LoginRequestDTO {
 
     @NotEmpty(message = "Username cannot be empty")
     @Schema(description = "Username", example = "test")
@@ -19,10 +19,10 @@ public class LoginDTO {
     @Schema(description = "Password", example = "12345678")
     private String password;
 
-    public LoginDTO() {
+    public LoginRequestDTO() {
     }
 
-    public LoginDTO(String username, String password) {
+    public LoginRequestDTO(String username, String password) {
         this.username = username;
         this.password = password;
     }

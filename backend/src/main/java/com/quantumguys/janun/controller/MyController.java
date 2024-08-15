@@ -17,13 +17,13 @@ import com.quantumguys.janun.dto.AuthUserDTO;
 import com.quantumguys.janun.dto.ChannelDTO;
 import com.quantumguys.janun.dto.CommentDTO;
 import com.quantumguys.janun.dto.GeneralResponseDTO;
-import com.quantumguys.janun.dto.PageChannelWrapper;
-import com.quantumguys.janun.dto.PageCommentWrapper;
+import com.quantumguys.janun.dto.ChannelsPage;
+import com.quantumguys.janun.dto.CommentsPage;
 import com.quantumguys.janun.dto.PageDTO;
-import com.quantumguys.janun.dto.PagePostWrapper;
-import com.quantumguys.janun.dto.PageReactionWrapper;
-import com.quantumguys.janun.dto.PageReportWrapper;
-import com.quantumguys.janun.dto.PageThreadWrapper;
+import com.quantumguys.janun.dto.PostsPage;
+import com.quantumguys.janun.dto.ReactionsPage;
+import com.quantumguys.janun.dto.ReportsPage;
+import com.quantumguys.janun.dto.ThreadsPage;
 import com.quantumguys.janun.dto.PostDTO;
 import com.quantumguys.janun.dto.ReactionDTO;
 import com.quantumguys.janun.dto.ReportDTO;
@@ -73,7 +73,7 @@ public class MyController {
     @GetMapping("/")
     @Operation(summary = "get logged in user", description = "get logged in user")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AuthUserDTO.class)))
-    public ResponseEntity<?> getUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public ResponseEntity<?> getMe(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         try {
             AuthUserDTO authUserDTO = authService.getUser(getUsername(userPrincipal));
@@ -85,8 +85,8 @@ public class MyController {
 
     @GetMapping("/channel")
     @Operation(summary = "user's subscribed channels")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = PageChannelWrapper.class)))
-    public ResponseEntity<?> getChannels(
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = ChannelsPage.class)))
+    public ResponseEntity<?> getMySubscribedChannels(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestParam(required = false) String search,
             @RequestParam(required = false, defaultValue = "createdAt") String sort,
@@ -105,8 +105,8 @@ public class MyController {
 
     @GetMapping("/thread")
     @Operation(summary = "Get subscribed Threads")
-    @ApiResponse(responseCode = "200", description = "Threads", content = @Content(schema = @Schema(implementation = PageThreadWrapper.class)))
-    public ResponseEntity<?> getThreads(
+    @ApiResponse(responseCode = "200", description = "Threads", content = @Content(schema = @Schema(implementation = ThreadsPage.class)))
+    public ResponseEntity<?> getMySubscribedThreads(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestParam(required = false) String search,
             @RequestParam(required = false, defaultValue = "createdAt") String sort,
@@ -125,8 +125,8 @@ public class MyController {
 
     @GetMapping("/post")
     @Operation(summary = "Get subscribed posts")
-    @ApiResponse(responseCode = "200", description = "posts", content = @Content(schema = @Schema(implementation = PagePostWrapper.class)))
-    public ResponseEntity<?> getPosts(
+    @ApiResponse(responseCode = "200", description = "posts", content = @Content(schema = @Schema(implementation = PostsPage.class)))
+    public ResponseEntity<?> getMySubscribedPosts(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestParam(required = false) String search,
             @RequestParam(required = false, defaultValue = "createdAt") String sort,
@@ -145,7 +145,7 @@ public class MyController {
 
     @GetMapping("/report")
     @Operation(summary = "Get all reports by me")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = PageReportWrapper.class)))
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = ReportsPage.class)))
     public ResponseEntity<?> getMyReports(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestParam(required = false) String search,
@@ -165,7 +165,7 @@ public class MyController {
 
     @GetMapping("/reaction")
     @Operation(summary = "Get all reactions by me")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = PageReactionWrapper.class)))
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = ReactionsPage.class)))
     public ResponseEntity<?> getMyReactions(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestParam(required = false) String search,
@@ -185,7 +185,7 @@ public class MyController {
 
     @GetMapping("/comment")
     @Operation(summary = "Get all comments by me")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = PageCommentWrapper.class)))
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = CommentsPage.class)))
     public ResponseEntity<?> getMyComments(
             @AuthenticationPrincipal UserPrincipal user,
             @RequestParam(required = false) String search,

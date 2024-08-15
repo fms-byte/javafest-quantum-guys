@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ChannelCreateDTO {
+public class ThreadCreateRequestDTO {
     private boolean premium;
     private String slug;
     private String name;

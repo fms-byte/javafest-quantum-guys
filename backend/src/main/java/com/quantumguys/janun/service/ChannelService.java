@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.quantumguys.janun.dto.ChannelCreateDTO;
+import com.quantumguys.janun.dto.ChannelCreateRequestDTO;
 import com.quantumguys.janun.dto.ChannelDTO;
 import com.quantumguys.janun.dto.PageDTO;
 import com.quantumguys.janun.dto.TagMinDTO;
@@ -41,7 +41,7 @@ public class ChannelService {
     @Autowired
     private AuthUserRepository authUserRepository;
 
-    public ChannelDTO createChannel(String username, ChannelCreateDTO channelCreateDTO) {
+    public ChannelDTO createChannel(String username, ChannelCreateRequestDTO channelCreateDTO) {
         channelRepository.findBySlug(channelCreateDTO.getSlug())
                 .ifPresent(channel -> {
                     throw new RuntimeException("Channel already exists with slug " + channelCreateDTO.getSlug());
@@ -73,7 +73,7 @@ public class ChannelService {
         return convertToDto(username, channel);
     }
 
-    public ChannelDTO updateChannel(String username, String slug, ChannelCreateDTO channelUpdateDTO) {
+    public ChannelDTO updateChannel(String username, String slug, ChannelCreateRequestDTO channelUpdateDTO) {
         Channel channel = channelRepository.findBySlug(slug)
                 .orElseThrow(() -> new RuntimeException("Channel not found"));
 

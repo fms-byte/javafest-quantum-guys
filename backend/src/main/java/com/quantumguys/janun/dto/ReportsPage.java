@@ -5,6 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PageReportWrapper extends PageDTO<ReportDTO>{
+public class ReportsPage extends PageDTO<ReportDTO>{
     
 }
