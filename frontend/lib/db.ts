@@ -27,6 +27,7 @@ export const trendingTopics = [
 
 export type PostDataProps = {
   slug: string;
+  date: string;
   title: string;
   type: string;
   premium: boolean;
@@ -68,6 +69,7 @@ export type PostDataProps = {
 export const Posts: PostDataProps[] = [
   {
     slug: "1",
+    date: "2024-07-04",
     title: "New Job Openings at Ministry of Education",
     type: "news",
     premium: false,
@@ -108,13 +110,14 @@ export const Posts: PostDataProps[] = [
     ],
     media: [
       {
-        url: "https://via.placeholder.com/150",
+        url: "https://plus.unsplash.com/premium_photo-1676637000058-96549206fe71?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
         type: "image",
       },
     ],
   },
   {
     slug: "2",
+    date: "2024-07-04",
     title: "COVID-19 Vaccination Campaign",
     type: "news",
     premium: false,
@@ -162,6 +165,7 @@ export const Posts: PostDataProps[] = [
   },
   {
     slug: "3",
+    date: "2024-07-04",
     title: "Government Tenders",
     type: "news",
     premium: false,
@@ -209,6 +213,7 @@ export const Posts: PostDataProps[] = [
   },
   {
     slug: "4",
+    date: "2024-07-04",
     title: "University Admissions Open",
     type: "news",
     premium: false,

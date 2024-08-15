@@ -20,11 +20,21 @@ export default function Feed() {
   };
 
   return (
-    <div className="flex flex-col mx-auto w-full md:w-2/3 lg:w-1/2 p-2 md:p-4 space-y-4 md:space-y-6 overflow-y-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Posts.map((post) => (
-          <PostCard key={post.slug} post={post} />
-        ))}
+    <div className="bg-gray-50 border rounded-lg border-gray-300 h-full overflow-y-auto lg:overflow-y-visible stylish-scrollbar">
+      <div className="py-8 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl lg:mx-0">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            From the feed
+          </h2>
+          <p className="mt-2 text-lg leading-8 text-gray-600">
+            Here are some of the latest news and posts from our feed
+          </p>
+        </div>
+        <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 border-t border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+          {Posts.map((post) => (
+            <PostCard key={post.slug} post={post} />
+          ))}
+        </div>
       </div>
     </div>
   );
