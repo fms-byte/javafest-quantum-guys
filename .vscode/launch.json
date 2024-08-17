@@ -1,0 +1,14 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-JanunApplication<janun>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.quantumguys.janun.JanunApplication",
+      "projectName": "janun",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}
