@@ -1,15 +1,39 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import { Container, Typography, Button, Box, Grid, Card, CardContent, CardActions } from "@mui/material";
 import { useRouter } from 'next/navigation';
 import { Pacifico } from "next/font/google";
+import { ApiClient, User } from "@asfilab/janun-client";
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] });
 
 const HomePage: React.FC = () => {
   const router = useRouter();
+  const [toggleLearnMore, setToggleLearnMore] = React.useState(false);
+
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const apiUrl = "http://localhost:5000";
+        const token = localStorage.getItem("token") || "";
+        const apiClient = new ApiClient(apiUrl, token);
+        const result = await apiClient.auth.getUser();
+        setUser(result);
+      } catch (error: any) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const toggle = () => {
+    setToggleLearnMore(!toggleLearnMore);
+  };
 
   return (
     <Box sx={{ overflow: "hidden" }}>
@@ -61,9 +85,11 @@ const HomePage: React.FC = () => {
                 <Button variant="contained" color="primary" sx={{ mr: 2 }} onClick={() => router.push('/feed')}>
                   Open Feed
                 </Button>
-                <Button variant="outlined" color="secondary" sx={{ mr: 2 }} onClick={() => router.push('/register')}>
-                  Register
-                </Button>
+                {!user && (
+                  <Button variant="outlined" color="secondary" sx={{ mr: 2 }} onClick={() => router.push('/register')}>
+                    Register
+                  </Button>
+                )}
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -83,7 +109,7 @@ const HomePage: React.FC = () => {
       </Box>
 
       {/* About Section */}
-      <Box id="about" sx={{ py: 8, backgroundColor: "secondary.main" }}>
+      <Box id="about" sx={{ height: "100vh", overflow: "hidden", py: 8, backgroundColor: "secondary.main" }}>
         <Container>
           <Grid container spacing={6}>
             <Grid item xs={12} md={6}>
@@ -103,32 +129,45 @@ const HomePage: React.FC = () => {
                   Janun!
                 </Box>
               </Typography>
-              <Typography variant="body1" color="black" sx={{ mb: 4 }}>
-                Sometimes, we need updates from websites about exam results,
-                tender notices, job openings, etc., and we constantly check
-                these websites for days to stay updated. This is a common issue
-                because most government and public institution websites lack
-                notification features. This is where our app, Janun, comes into
-                play. Janun is a web app that connects users with various public
-                websites in Bangladesh, such as government websites, law courts,
-                universities, and more. Users can connect to different public
-                sites, subscribe to various topics, and receive notifications
-                through channels like email, push notifications, SMS, and more.
-                <br /> <br />
-                Janun is not just a news aggregator; it has its own scraping
-                system and crawlers that extract content from different sources,
-                post it, analyze it, and notify users about news and updates.
-                Janun will feature a recommendation system that suggests posts
-                based on user activity (subscriptions, reactions, comments,
-                etc.). It will feel like a social media platform where users can
-                follow different websites, react to, and comment on content.
-                Additionally, users will be able to view AI-generated weekly and
-                monthly reports on what is happening in the country. With a
-                wealth of content from public websites, the possibilities are
-                endless.
-              </Typography>
-              <Button variant="contained" color="primary">
-                Learn More
+              {
+                toggleLearnMore ? (
+                  <Typography variant="body1" color="black" sx={{ mb: 4 }}>
+                    Sometimes, we need updates from websites about exam results,
+                    tender notices, job openings, etc., and we constantly check
+                    these websites for days to stay updated. This is a common issue
+                    because most government and public institution websites lack
+                    notification features. This is where our app, Janun, comes into
+                    play. Janun is a web app that connects users with various public
+                    websites in Bangladesh, such as government websites, law courts,
+                    universities, and more. Users can connect to different public
+                    sites, subscribe to various topics, and receive notifications
+                    through channels like email, push notifications, SMS, and more.
+                    <br /> <br />
+                    Janun is not just a news aggregator; it has its own scraping
+                    system and crawlers that extract content from different sources,
+                    post it, analyze it, and notify users about news and updates.
+                    Janun will feature a recommendation system that suggests posts
+                    based on user activity (subscriptions, reactions, comments,
+                    etc.). It will feel like a social media platform where users can
+                    follow different websites, react to, and comment on content.
+                    Additionally, users will be able to view AI-generated weekly and
+                    monthly reports on what is happening in the country. With a
+                    wealth of content from public websites, the possibilities are
+                    endless.
+                  </Typography>
+                ) : (
+                  <Typography variant="body1" color="black" sx={{ mb: 4 }}>
+                    Janun is a web app that connects users with various public
+                    websites in Bangladesh, such as government websites, law courts,
+                    universities, and more. Users can connect to different public
+                    sites, subscribe to various topics, and receive notifications
+                    through channels like email, push notifications, SMS, and more.
+                  </Typography>
+                )
+              }
+
+              <Button variant="contained" color="primary" onClick={toggle}>
+                {toggleLearnMore ? "Show Less" : "Show More"}
               </Button>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -182,7 +221,7 @@ const HomePage: React.FC = () => {
                 interests. You can also view weekly and monthly reports on
                 trending topics in Bangladesh
               </Typography>
-              <Button variant="contained" color="primary">
+              <Button variant="contained" color="secondary" onClick={() => router.push('/register')}>
                 Get Started
               </Button>
             </Grid>
@@ -192,57 +231,57 @@ const HomePage: React.FC = () => {
 
       {/* Pricing Section */}
       <Box id="pricing" sx={{ py: 8, backgroundColor: "background.default" }}>
-      <Container>
-        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2, textAlign: "center" }}>
-          Pricing
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 4, textAlign: "center" }}>
-          We offer a free plan for basic notifications, with premium options available for advanced features like SMS alerts and multiple topic subscriptions.
-        </Typography>
-        <Grid container spacing={4} justifyContent="center">
-          <Grid item xs={12} sm={6} md={4}>
-            <Card variant="outlined" sx={{ textAlign: "center" }}>
-              <CardContent>
-                <Typography variant="h5" sx={{ mb: 2 }}>
-                  Free Plan
-                </Typography>
-                <Typography variant="h6" sx={{ mb: 2 }}>
-                  $0/month
-                </Typography>
-                <Typography variant="body2">
-                  Basic notifications via email and push alerts. Limited to one topic subscription.
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button variant="contained" color="primary" fullWidth>
-                  Choose Plan
-                </Button>
-              </CardActions>
-            </Card>
+        <Container>
+          <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2, textAlign: "center" }}>
+            Pricing
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 4, textAlign: "center" }}>
+            We offer a free plan for basic notifications, with premium options available for advanced features like SMS alerts and multiple topic subscriptions.
+          </Typography>
+          <Grid container spacing={4} justifyContent="center">
+            <Grid item xs={12} sm={6} md={4}>
+              <Card variant="outlined" sx={{ textAlign: "center", borderColor: "primary.main", border: "1px solid primary.main", borderRadius: "15px" }}>
+                <CardContent>
+                  <Typography variant="h5" sx={{ mb: 2 }}>
+                    Free Plan
+                  </Typography>
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    $0/month
+                  </Typography>
+                  <Typography variant="body2">
+                    Basic notifications via email and push alerts. Limited to one topic subscription.
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <Button variant="contained" color="primary" fullWidth>
+                    Choose Plan
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Card variant="outlined" sx={{ textAlign: "center", borderColor: "primary.main", border: "1px solid primary.main", borderRadius: "15px" }}>
+                <CardContent>
+                  <Typography variant="h5" sx={{ mb: 2 }}>
+                    Premium Plan
+                  </Typography>
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    $10/month
+                  </Typography>
+                  <Typography variant="body2">
+                    Advanced features including SMS alerts, multiple topic subscriptions, and priority support.
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <Button variant="contained" color="primary" fullWidth>
+                    Choose Plan
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Card variant="outlined" sx={{ textAlign: "center"}}>
-              <CardContent>
-                <Typography variant="h5" sx={{ mb: 2 }}>
-                  Premium Plan
-                </Typography>
-                <Typography variant="h6" sx={{ mb: 2 }}>
-                  $10/month
-                </Typography>
-                <Typography variant="body2">
-                  Advanced features including SMS alerts, multiple topic subscriptions, and priority support.
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button variant="contained" color="primary" fullWidth>
-                  Choose Plan
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
+        </Container>
+      </Box>
 
       {/* Footer Section */}
       <Box

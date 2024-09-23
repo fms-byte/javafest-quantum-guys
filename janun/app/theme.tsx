@@ -11,10 +11,10 @@ const getTheme = (mode:any) => createTheme({
       paper: mode === 'dark' ? "#181C14" : "#181C14",
     },
     primary: {
-      main: "#bcfd49",
+      main: "#49fd8a",
     },
     secondary: {
-      main: "#f9e94b",
+      main: "#fbee75",
     },
     text: {
       primary: mode === 'dark' ? "#ffffff" : "#ffffff",

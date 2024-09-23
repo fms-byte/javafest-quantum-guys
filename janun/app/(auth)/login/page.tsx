@@ -26,7 +26,7 @@ export default function LoginPage() {
       setResponse(JSON.stringify(result, null, 2));
       localStorage.setItem("token", result.token || "");
       setOpenSnackbar(true); // Show snackbar on successful login
-      router.push('/'); // Redirect to home or desired page
+      router.push('/feed'); // Redirect to home or desired page
     } catch (error: any) {
       console.error("Error logging in:", error);
       setResponse(error.message || "Error logging in");

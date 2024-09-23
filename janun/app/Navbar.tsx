@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -22,11 +22,30 @@ import Brightness7Icon from "@mui/icons-material/Brightness7";
 import CloseIcon from "@mui/icons-material/Close";
 import { DarkModeContext } from './ClientProvider'; // Import the context
 import { useRouter } from 'next/navigation';
+import { ApiClient, User } from "@asfilab/janun-client";
 
 const Navbar: React.FC = () => {
   const router = useRouter();
   const theme = useTheme();
-  
+
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const apiUrl = "http://localhost:5000";
+        const token = localStorage.getItem("token") || "";
+        const apiClient = new ApiClient(apiUrl, token);
+        const result = await apiClient.auth.getUser();
+        setUser(result);
+      } catch (error: any) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   // Access the context using useContext
   const darkModeContext = useContext(DarkModeContext);
 
@@ -91,12 +110,18 @@ const Navbar: React.FC = () => {
           <Button color="inherit" sx={{ margin: "0 8px" }} onClick={() => router.push('#about')}>
             About
           </Button>
-          <Button color="inherit" sx={{ margin: "0 8px" }} onClick={() => router.push('/login')}>
-            Login
-          </Button>
-          <Button variant="contained" color="inherit" sx={{ margin: "0 8px" }} onClick={() => router.push('/register')}>
-            Register
-          </Button>
+          {user ? (
+            <Button color="inherit" sx={{ margin: "0 8px" }} onClick={() => router.push('/feed')}>
+              Feed
+            </Button>
+          ) : <>
+            <Button color="inherit" sx={{ margin: "0 8px" }} onClick={() => router.push('/login')}>
+              Login
+            </Button>
+            <Button variant="contained" color="inherit" sx={{ margin: "0 8px" }} onClick={() => router.push('/register')}>
+              Register
+            </Button>
+          </>}
           <IconButton
             onClick={toggleDarkMode}
             color="inherit"

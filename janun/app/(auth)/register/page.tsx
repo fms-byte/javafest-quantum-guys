@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Box, Button, TextField, Typography, Link } from "@mui/material";
+import { Box, Button, TextField, Typography, Link, Snackbar, Alert } from "@mui/material";
 import { ApiClient, User } from "@asfilab/janun-client";
 import { useRouter } from 'next/navigation';
 
@@ -11,6 +11,8 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [usernameAvailable, setUsernameAvailable] = useState(false);
   const router = useRouter();
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   useEffect(() => {
     const checkUsername = async () => {
@@ -36,6 +38,8 @@ export default function Register() {
       const apiClient = new ApiClient(apiUrl);
       if (!usernameAvailable) {
         setResponse("Username already taken");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
         return;
       }
       const result: User = await apiClient.auth.register({
@@ -45,11 +49,25 @@ export default function Register() {
           password,
         },
       });
-      setResponse(JSON.stringify(result, null, 2));
+      console.log("Registered:", result);
+      setResponse("Registration successful!");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+
+      // Redirect after a short delay
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
     } catch (error: any) {
       console.error("Error registering:", error);
       setResponse(error.message || "Error registering");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   return (
@@ -90,7 +108,7 @@ export default function Register() {
           error={!!username && !usernameAvailable}
           helperText={
             username && !usernameAvailable ? "Username already taken" :
-            username && usernameAvailable ? "Username available" : ""
+              username && usernameAvailable ? "Username available" : ""
           }
         />
         <TextField
@@ -115,6 +133,7 @@ export default function Register() {
           color="primary"
           fullWidth
           disabled={!usernameAvailable || !username || !email || !password}
+          onClick={handleRegister}
         >
           Register
         </Button>
@@ -130,22 +149,21 @@ export default function Register() {
           </Link>
         </Typography>
       </Box>
-      {response && (
-        <Box
-          sx={{
-            mt: 4,
-            width: { xs: "100%", sm: "400px" },
-            bgcolor: "background.paper",
-            p: 2,
-            borderRadius: 1,
-            boxShadow: 3,
-          }}
+
+      {/* Snackbar for success/error messages */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
         >
-          <Typography variant="body2" color="text.secondary">
-            {response}
-          </Typography>
-        </Box>
-      )}
+          {response}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
