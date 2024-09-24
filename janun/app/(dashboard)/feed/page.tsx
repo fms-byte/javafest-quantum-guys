@@ -27,7 +27,7 @@ export default function PostsWebPage() {
         page: currentPage,
         size: 2,
       });
-      console.log(result);
+      //console.log(result);
       if (result.data && result.data.length === 0) {
         setHasMore(false);
       } else {

@@ -2,7 +2,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, Home, Hash, FileText, Crown, Search } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Pacifico } from "next/font/google";
+import { Bell, Home, Hash, FileText, Search } from "lucide-react";
+import MenuIcon from "@mui/icons-material/Menu";
 import {
   Avatar,
   Box,
@@ -11,15 +14,26 @@ import {
   Divider,
   Typography,
   IconButton,
-  SwipeableDrawer, // For mobile sidebar
+  SwipeableDrawer,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { Pacifico } from "next/font/google";
-import MenuIcon from "@mui/icons-material/Menu";
-import CloseIcon from "@mui/icons-material/Close";
 import UserCardMini from "./UserCardMini";
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] });
+
+const menuItems = [
+  { icon: Home, label: "Feed", id: "feed" },
+  { icon: Bell, label: "Channel", id: "channel" },
+  { icon: Hash, label: "Tags", id: "tags" },
+  { icon: FileText, label: "Reports", id: "reports" },
+];
+
+const popularChannels = [
+  "📚 Jagannath University",
+  "🏛️ Government",
+  "🚄 Railway",
+];
+
+const myChannels = ["👨‍💻 DevsOnly", "🎮 Gamers Hub", "🎨 Art Zone"];
 
 export default function DashboardLayout({
   children,
@@ -28,60 +42,38 @@ export default function DashboardLayout({
 }) {
   const [activeMenu, setActiveMenu] = useState("feed");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false); // For mobile sidebar drawer
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    setIsMounted(true); // Ensures that the code runs after the component is mounted
+    setIsMounted(true);
   }, []);
 
-  const menuItems = [
-    { icon: Home, label: "Feed", id: "feed" },
-    { icon: Bell, label: "Channel", id: "channel" },
-    { icon: Hash, label: "Tags", id: "tags" },
-    { icon: FileText, label: "Reports", id: "reports" },
-  ];
-
-  const popularChannels = [
-    "📚 Jagannath University",
-    "🏛️ Government",
-    "🚄 Railway",
-  ];
-
-  const myChannels = ["👨‍💻 DevsOnly", "🎮 Gamers Hub", "🎨 Art Zone"];
+  const isPostDetailsPage = pathname.startsWith('/feed/');
 
   const handleMenuClick = (id: string) => {
     setActiveMenu(id);
     if (isMounted) {
-      router.push(`/${id}`); // Navigates to different pages based on the menu item
+      router.push(`/${id}`);
     }
   };
 
-  const sidebarContent = (
+  const renderSidebarContent = () => (
     <>
-      <Box
-        sx={{
-          p: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Box onClick={() => router.push("/")} sx={{ cursor: "pointer" }}>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            className={pacifico.className}
-            onClick={() => router.push("/")}
-          >
-            Janun!
-          </Typography>
-        </Box>
+      <Box sx={{ p: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          className={pacifico.className}
+          onClick={() => router.push("/")}
+          sx={{ cursor: "pointer" }}
+        >
+          Janun!
+        </Typography>
       </Box>
-
       <Divider />
-
       <Box sx={{ flex: 1, overflowY: "auto" }}>
         {menuItems.map((item) => (
           <Button
@@ -101,16 +93,79 @@ export default function DashboardLayout({
           </Button>
         ))}
       </Box>
-
       <Divider />
-
       <UserCardMini />
     </>
   );
 
+  const renderRightPanel = () => (
+    <Box
+      sx={{
+        width: { xs: "100%", sm: 320 },
+        display: isPostDetailsPage ? "none" : { xs: "none", sm: "none", md: "flex" },
+        flexDirection: "column",
+        gap: 3,
+        position: "relative",
+        bgcolor: "background.paper",
+        boxShadow: 3,
+        borderRadius: 2,
+        p: 2,
+        "& > *": {
+          mb: 2,
+          "&:last-child": { mb: 0 },
+        },
+      }}
+    >
+      <Box>
+        <Typography variant="h6" fontWeight="bold">
+          📌 Popular Channels
+        </Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
+          {popularChannels.map((channel, index) => (
+            <Button
+              key={index}
+              fullWidth
+              variant="outlined"
+              sx={{
+                justifyContent: "flex-start",
+                textTransform: "none",
+                color: "text.primary",
+                p: 1.5,
+              }}
+            >
+              {channel}
+            </Button>
+          ))}
+        </Box>
+      </Box>
+      <Divider />
+      <Box>
+        <Typography variant="h6" fontWeight="bold">
+          🔊 My Channels
+        </Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
+          {myChannels.map((channel, index) => (
+            <Button
+              key={index}
+              fullWidth
+              variant="outlined"
+              sx={{
+                justifyContent: "flex-start",
+                textTransform: "none",
+                color: "text.primary",
+                p: 1.5,
+              }}
+            >
+              {channel}
+            </Button>
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      {/* Left Sidebar */}
       <Box
         sx={{
           width: isSidebarOpen ? { xs: 64, sm: 240 } : 64,
@@ -125,10 +180,9 @@ export default function DashboardLayout({
           transition: "width 0.3s",
         }}
       >
-        {sidebarContent}
+        {renderSidebarContent()}
       </Box>
 
-      {/* Sidebar for mobile using SwipeableDrawer */}
       <SwipeableDrawer
         anchor="bottom"
         open={isDrawerOpen}
@@ -136,19 +190,10 @@ export default function DashboardLayout({
         onOpen={() => setIsDrawerOpen(true)}
         sx={{ display: { xs: "block", sm: "none" } }}
       >
-        {sidebarContent}
+        {renderSidebarContent()}
       </SwipeableDrawer>
 
-      {/* Main Content */}
-      <Box
-        sx={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        {/* Top Bar */}
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <Box
           sx={{
             bgcolor: "background.paper",
@@ -166,7 +211,6 @@ export default function DashboardLayout({
           >
             <MenuIcon />
           </IconButton>
-
           <Box sx={{ position: "relative", width: "100%" }}>
             <Search
               style={{
@@ -186,84 +230,9 @@ export default function DashboardLayout({
           </Box>
         </Box>
 
-        {/* Main Content Area */}
-        <Box
-          sx={{ display: "flex", flex: 1, p: 3, gap: 3, overflow: "hidden" }}
-        >
+        <Box sx={{ display: "flex", flex: 1, p: 3, gap: 3, overflow: "hidden" }}>
           <Box sx={{ flex: 1, overflowY: "auto" }}>{children}</Box>
-
-          {/* Right Panel */}
-          <Box
-            sx={{
-              width: { xs: "100%", sm: 320 },
-              display: { xs: "none", sm: "none", md: "flex" },
-              flexDirection: "column",
-              gap: 3,
-              position: "relative",
-              bgcolor: "background.paper",
-              boxShadow: 3,
-              borderRadius: 2,
-              p: 2,
-              "& > *": {
-                mb: 2,
-                "&:last-child": { mb: 0 },
-              },
-            }}
-          >
-            {/* Popular Channels Section */}
-            <Box>
-              <Typography variant="h6" fontWeight="bold">
-                📌 Popular Channels
-              </Typography>
-              <Box
-                sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}
-              >
-                {popularChannels.map((channel, index) => (
-                  <Button
-                    key={index}
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      justifyContent: "flex-start",
-                      textTransform: "none",
-                      color: "text.primary",
-                      p: 1.5,
-                    }}
-                  >
-                    {channel}
-                  </Button>
-                ))}
-              </Box>
-            </Box>
-
-            <Divider />
-
-            {/* My Channels Section */}
-            <Box>
-              <Typography variant="h6" fontWeight="bold">
-                🔊 My Channels
-              </Typography>
-              <Box
-                sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}
-              >
-                {myChannels.map((channel, index) => (
-                  <Button
-                    key={index}
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      justifyContent: "flex-start",
-                      textTransform: "none",
-                      color: "text.primary",
-                      p: 1.5,
-                    }}
-                  >
-                    {channel}
-                  </Button>
-                ))}
-              </Box>
-            </Box>
-          </Box>
+          {renderRightPanel()}
         </Box>
       </Box>
     </Box>
