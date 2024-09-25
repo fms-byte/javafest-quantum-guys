@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Pacifico } from "next/font/google";
-import { Bell, Home, Hash, FileText, Search } from "lucide-react";
+import { Bell, Home, Hash, FileText, Search, Settings2 } from "lucide-react";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
   Avatar,
@@ -21,6 +21,8 @@ import {
   Popover,
   Card,
   Drawer,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import UserCardMini from "./UserCardMini";
 import { ApiClient, Channel, User } from "@asfilab/janun-client";
@@ -51,6 +53,9 @@ export default function DashboardLayout({
   const [popularChannels, setPopularChannels] = useState<Channel[]>([]);
   const [notificationAnchor, setNotificationAnchor] =
     useState<null | HTMLElement>(null);
+  const [settingsAnchor, setSettingsAnchor] = useState<null | HTMLElement>(
+    null
+  );
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -73,6 +78,18 @@ export default function DashboardLayout({
   ]);
   const [isUserDrawerOpen, setIsUserDrawerOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [preferences, setPreferences] = useState({
+    email: false,
+    sms: false,
+    push: false,
+  });
+
+  const handleCheckboxChange = (event) => {
+    setPreferences({
+      ...preferences,
+      [event.target.name]: event.target.checked,
+    });
+  };
 
   const handleAvatarClick = () => {
     setIsUserDrawerOpen(true);
@@ -90,10 +107,21 @@ export default function DashboardLayout({
     setNotificationAnchor(null);
   };
 
+  const handleSettingsClick = (event: React.MouseEvent<HTMLElement>) => {
+    setSettingsAnchor(event.currentTarget);
+  };
+
+  const handleSettingsClose = () => {
+    setSettingsAnchor(null);
+  };
+
   const isNotificationOpen = Boolean(notificationAnchor);
   const notificationId = isNotificationOpen
     ? "notification-popover"
     : undefined;
+
+  const isSettingsOpen = Boolean(settingsAnchor);
+  const settingsId = isSettingsOpen ? "settings-popover" : undefined;
 
   const fetchPopularChannels = async () => {
     try {
@@ -132,7 +160,7 @@ export default function DashboardLayout({
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
-  }
+  };
 
   useEffect(() => {
     fetchPopularChannels();
@@ -356,9 +384,12 @@ export default function DashboardLayout({
             <Input placeholder="Search..." sx={{ pl: 5, width: "100%" }} />
           </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <Button onClick={handleNotificationClick}>
               <Bell />
+            </Button>
+            <Button onClick={handleSettingsClick}>
+              <Settings2 size={24} />
             </Button>
             <Avatar
               src={user?.profile?.avatar || "/images/avatar_drawn.jpg"}
@@ -412,12 +443,78 @@ export default function DashboardLayout({
             </Box>
           </Popover>
 
+          <Popover
+            id={settingsId}
+            open={isSettingsOpen}
+            anchorEl={settingsAnchor}
+            onClose={handleSettingsClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            sx={{
+              mt: 2,
+            }}
+          >
+            <Box
+              sx={{
+                p: 2,
+                width: 300,
+                border: "1px solid #49fd8a",
+                borderRadius: 2,
+                boxShadow: 3,
+                textAlign: "center"
+              }}
+            >
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Notification Preference
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={preferences.email}
+                    onChange={handleCheckboxChange}
+                    name="email"
+                    color="primary"
+                  />
+                }
+                label="Email Notifications"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={preferences.sms}
+                    onChange={handleCheckboxChange}
+                    name="sms"
+                    color="primary"
+                  />
+                }
+                label="SMS Notifications"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={preferences.push}
+                    onChange={handleCheckboxChange}
+                    name="push"
+                    color="primary"
+                  />
+                }
+                label="Push Notifications"
+              />
+            </Box>
+          </Popover>
+
           <Drawer
             anchor="right"
             open={isUserDrawerOpen}
             onClose={handleDrawerClose}
           >
-            <UserCard userData={user}/>
+            <UserCard userData={user} />
           </Drawer>
         </Box>
 
