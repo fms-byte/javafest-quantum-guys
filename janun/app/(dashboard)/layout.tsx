@@ -17,6 +17,7 @@ import {
   SwipeableDrawer,
 } from "@mui/material";
 import UserCardMini from "./UserCardMini";
+import { ApiClient, Channel } from "@asfilab/janun-client";
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] });
 
@@ -26,14 +27,6 @@ const menuItems = [
   { icon: Hash, label: "Tags", id: "tags" },
   { icon: FileText, label: "Reports", id: "reports" },
 ];
-
-const popularChannels = [
-  "📚 Jagannath University",
-  "🏛️ Government",
-  "🚄 Railway",
-];
-
-const myChannels = ["👨‍💻 DevsOnly", "🎮 Gamers Hub", "🎨 Art Zone"];
 
 export default function DashboardLayout({
   children,
@@ -46,12 +39,55 @@ export default function DashboardLayout({
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const [myChannels, setMyChannels] = useState<Channel[]>([]);
+  const [popularChannels, setPopularChannels] = useState<Channel[]>([]);
+
+  const fetchPopularChannels = async () => {
+    try {
+      const apiUrl = "http://localhost:5000";
+      const token = localStorage.getItem("token") || "";
+      const apiClient = new ApiClient(apiUrl, token);
+      const result = await apiClient.channel.getChannels();
+      console.log("Popular Channels:", result);
+      setPopularChannels(result.data);
+    } catch (error) {
+      console.error("Error fetching popular channels:", error);
+    }
+  }
+
+  const fetchMyChannels = async () => {
+    try {
+      const apiUrl = "http://localhost:5000";
+      const token = localStorage.getItem("token") || "";
+      const apiClient = new ApiClient(apiUrl, token);
+      const result = await apiClient.my.getMySubscribedChannels();
+      console.log("My Channels:", result);
+      setMyChannels(result.data);
+    } catch (error) {
+      console.error("Error fetching my channels:", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchPopularChannels();
+    fetchMyChannels();
+  }, []);
+
+  const sortPupularChannels = (channels: Channel[]) => {
+    return channels.sort((a, b) => b.subscriberCount - a.subscriberCount).slice(0, 3);
+  }
 
   useEffect(() => {
     setIsMounted(true);
+    const activeMenuItem = menuItems.find(
+      (item) => pathname === `/${item.id}` || pathname === `/${item.id}/`
+    );
+    if (activeMenuItem) {
+      setActiveMenu(activeMenuItem.id);
+    }
   }, []);
 
-  const isPostDetailsPage = pathname.startsWith('/feed/');
+  const isPostDetailsPage = pathname.startsWith("/feed/");
 
   const handleMenuClick = (id: string) => {
     setActiveMenu(id);
@@ -60,9 +96,27 @@ export default function DashboardLayout({
     }
   };
 
+  useEffect(() => {
+    if (isMounted) {
+      const activeMenuItem = menuItems.find(
+        (item) => pathname === `/${item.id}` || pathname === `/${item.id}/`
+      );
+      if (activeMenuItem) {
+        setActiveMenu(activeMenuItem.id);
+      }
+    }
+  }, [pathname, isMounted]);
+
   const renderSidebarContent = () => (
     <>
-      <Box sx={{ p: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <Box
+        sx={{
+          p: 2,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <Typography
           variant="h4"
           fontWeight="bold"
@@ -102,7 +156,9 @@ export default function DashboardLayout({
     <Box
       sx={{
         width: { xs: "100%", sm: 320 },
-        display: isPostDetailsPage ? "none" : { xs: "none", sm: "none", md: "flex" },
+        display: isPostDetailsPage
+          ? "none"
+          : { xs: "none", sm: "none", md: "flex" },
         flexDirection: "column",
         gap: 3,
         position: "relative",
@@ -121,7 +177,7 @@ export default function DashboardLayout({
           📌 Popular Channels
         </Typography>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
-          {popularChannels.map((channel, index) => (
+          {sortPupularChannels(popularChannels).map((channel, index) => (
             <Button
               key={index}
               fullWidth
@@ -133,7 +189,7 @@ export default function DashboardLayout({
                 p: 1.5,
               }}
             >
-              {channel}
+              {channel.name}
             </Button>
           ))}
         </Box>
@@ -156,7 +212,7 @@ export default function DashboardLayout({
                 p: 1.5,
               }}
             >
-              {channel}
+              {channel.name}
             </Button>
           ))}
         </Box>
@@ -193,7 +249,14 @@ export default function DashboardLayout({
         {renderSidebarContent()}
       </SwipeableDrawer>
 
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
         <Box
           sx={{
             bgcolor: "background.paper",
@@ -230,7 +293,9 @@ export default function DashboardLayout({
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", flex: 1, p: 3, gap: 3, overflow: "hidden" }}>
+        <Box
+          sx={{ display: "flex", flex: 1, p: 3, gap: 3, overflow: "hidden" }}
+        >
           <Box sx={{ flex: 1, overflowY: "auto" }}>{children}</Box>
           {renderRightPanel()}
         </Box>

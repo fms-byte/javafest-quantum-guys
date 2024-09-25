@@ -12,6 +12,7 @@ import {
 import StarsIcon from "@mui/icons-material/Stars";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import { ApiClient, Channel } from "@asfilab/janun-client";
+import { useRouter } from "next/navigation";
 
 export const ChannelCard = ({ channel }: { channel: Channel }) => {
   const [channelData, setChannelData] = useState<Channel>(channel);
@@ -24,6 +25,7 @@ export const ChannelCard = ({ channel }: { channel: Channel }) => {
   const [channelLogo, setChannelLogo] = useState(channelData.logo);
   const [isPremium, setIsPremium] = useState(channelData.premium);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubscribe = async (type: "subscribe" | "unsubscribe") => {
     try {
@@ -50,6 +52,10 @@ export const ChannelCard = ({ channel }: { channel: Channel }) => {
     }
   };
 
+  const handleChannelCardClick = (slug) => {
+    router.push(`/channel/${slug}`);
+  };
+
   return (
     <Card
       sx={{
@@ -58,7 +64,9 @@ export const ChannelCard = ({ channel }: { channel: Channel }) => {
         alignItems: "center",
         justifyContent: "space-between",
         padding: 2,
+        cursor: "pointer",
       }}
+      onClick={() => handleChannelCardClick(channelSlug)}
     >
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Avatar
