@@ -15,9 +15,17 @@ import {
   Typography,
   IconButton,
   SwipeableDrawer,
+  List,
+  ListItem,
+  ListItemText,
+  Popover,
+  Card,
+  Drawer,
 } from "@mui/material";
 import UserCardMini from "./UserCardMini";
-import { ApiClient, Channel } from "@asfilab/janun-client";
+import { ApiClient, Channel, User } from "@asfilab/janun-client";
+import NotificationCard from "./NotificationCard";
+import UserCard from "./UserCard";
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] });
 
@@ -41,6 +49,51 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [myChannels, setMyChannels] = useState<Channel[]>([]);
   const [popularChannels, setPopularChannels] = useState<Channel[]>([]);
+  const [notificationAnchor, setNotificationAnchor] =
+    useState<null | HTMLElement>(null);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      message: "New post from jagannath university",
+      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      type: "info",
+    },
+    {
+      id: 2,
+      message: "Your comment received a reply",
+      date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      type: "warning",
+    },
+    {
+      id: 3,
+      message: "Your comment has been deleted!",
+      date: new Date(),
+      type: "error",
+    },
+  ]);
+  const [isUserDrawerOpen, setIsUserDrawerOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  const handleAvatarClick = () => {
+    setIsUserDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setIsUserDrawerOpen(false);
+  };
+
+  const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) => {
+    setNotificationAnchor(event.currentTarget);
+  };
+
+  const handleNotificationClose = () => {
+    setNotificationAnchor(null);
+  };
+
+  const isNotificationOpen = Boolean(notificationAnchor);
+  const notificationId = isNotificationOpen
+    ? "notification-popover"
+    : undefined;
 
   const fetchPopularChannels = async () => {
     try {
@@ -53,7 +106,7 @@ export default function DashboardLayout({
     } catch (error) {
       console.error("Error fetching popular channels:", error);
     }
-  }
+  };
 
   const fetchMyChannels = async () => {
     try {
@@ -66,16 +119,32 @@ export default function DashboardLayout({
     } catch (error) {
       console.error("Error fetching my channels:", error);
     }
+  };
+
+  const fetchUserData = async () => {
+    try {
+      const apiUrl = "http://localhost:5000";
+      const token = localStorage.getItem("token") || "";
+      const apiClient = new ApiClient(apiUrl, token);
+      const result = await apiClient.my.getMe();
+      console.log("User Data:", result);
+      setUser(result);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
   }
 
   useEffect(() => {
     fetchPopularChannels();
     fetchMyChannels();
+    fetchUserData();
   }, []);
 
   const sortPupularChannels = (channels: Channel[]) => {
-    return channels.sort((a, b) => b.subscriberCount - a.subscriberCount).slice(0, 3);
-  }
+    return channels
+      .sort((a, b) => b.subscriberCount - a.subscriberCount)
+      .slice(0, 3);
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -274,6 +343,7 @@ export default function DashboardLayout({
           >
             <MenuIcon />
           </IconButton>
+
           <Box sx={{ position: "relative", width: "100%" }}>
             <Search
               style={{
@@ -285,12 +355,70 @@ export default function DashboardLayout({
             />
             <Input placeholder="Search..." sx={{ pl: 5, width: "100%" }} />
           </Box>
+
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Button>
+            <Button onClick={handleNotificationClick}>
               <Bell />
             </Button>
-            <Avatar src="/images/avatar_drawn.jpg" alt="User" />
+            <Avatar
+              src={user?.profile?.avatar || "/images/avatar_drawn.jpg"}
+              alt={user?.username || "User"}
+              onClick={handleAvatarClick} // Avatar click opens the drawer
+              sx={{ cursor: "pointer" }}
+            />
           </Box>
+
+          <Popover
+            id={notificationId}
+            open={isNotificationOpen}
+            anchorEl={notificationAnchor}
+            onClose={handleNotificationClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            sx={{
+              mt: 2,
+            }}
+          >
+            <Box
+              sx={{
+                p: 2,
+                width: 400,
+                border: "1px solid #49fd8a",
+                borderRadius: 2,
+                boxShadow: 3,
+              }}
+            >
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Notifications
+              </Typography>
+              {notifications.length > 0 ? (
+                notifications.map((notification) => (
+                  <NotificationCard
+                    key={notification.id}
+                    notification={notification}
+                  />
+                ))
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  No new notifications
+                </Typography>
+              )}
+            </Box>
+          </Popover>
+
+          <Drawer
+            anchor="right"
+            open={isUserDrawerOpen}
+            onClose={handleDrawerClose}
+          >
+            <UserCard userData={user}/>
+          </Drawer>
         </Box>
 
         <Box

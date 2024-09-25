@@ -57,9 +57,9 @@ const UserCardMini: React.FC = () => {
             <Box display="flex" alignItems="center" gap={2}>
                 <Avatar src={user.profile?.avatar || "/images/avatar_drawn.jpg"} alt={user.profile?.name || "Avatar"} />
                 <Box>
-                    <Typography fontWeight="medium">{user.username || "Name"}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {user.email || "Email"}
+                    <Typography fontWeight="medium" sx={{wordBreak: "break-word"}}>{user.username || "Name"}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ wordBreak: "break-word",}}>
+                        { user.email ||"Email"}
                     </Typography>
                 </Box>
             </Box>
