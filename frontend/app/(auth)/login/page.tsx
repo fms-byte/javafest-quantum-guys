@@ -1,153 +1,118 @@
-"use client";
-import Link from "next/link";
-import { useAuthProvider } from "@/lib/contexts/AuthContext";
-import { useForm } from "react-hook-form";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { HashLoader } from "react-spinners";
+// app/auth/login/page.tsx
 
-interface FormData {
-  username: string;
-  password: string;
-}
+"use client";
+import React, { useState } from "react";
+import { Box, Button, TextField, Link, Typography, Snackbar, Alert } from "@mui/material";
+import { useRouter } from 'next/navigation';
+import { ApiClient } from "@asfilab/janun-client";
 
 export default function LoginPage() {
-  const { loading, login, isAuthenticated } = useAuthProvider();
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const router = useRouter();
+  const [username, setUsername] = useState("test");
+  const [password, setPassword] = useState("12345678");
+  const [jwtToken, setJwtToken] = useState<string>("");
+  const [response, setResponse] = useState<string | null>(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/feed");
-    }
-  }, [isAuthenticated, router]);
-
-  const {
-    register,
-    formState: { errors },
-    handleSubmit,
-  } = useForm({
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-  });
-
-  const onSubmit = async (data: FormData) => {
-    setIsLoggingIn(true);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      await login(data.username, data.password);
-    } catch (error) {
-      console.error("Login failed:", error);
-    } finally {
-      setIsLoggingIn(false);
+      const apiUrl = "http://localhost:5000";
+      const apiClient = new ApiClient(apiUrl);
+      const result = await apiClient.auth.login({
+        loginRequest: { username, password },
+      });
+      setJwtToken(result.token || "");
+      setResponse(JSON.stringify(result, null, 2));
+      localStorage.setItem("token", result.token || "");
+      setOpenSnackbar(true); // Show snackbar on successful login
+      router.push('/feed'); // Redirect to home or desired page
+    } catch (error: any) {
+      console.error("Error logging in:", error);
+      setResponse(error.message || "Error logging in");
+      setOpenSnackbar(true); // Show snackbar on error
     }
   };
 
-  if (loading || isLoggingIn) {
-    return (
-      <div className="flex items-center justify-center h-screen mx-auto">
-        <HashLoader color="#6366F1" size={50} />
-      </div>
-    );
-  }
+  const handleCopyToken = () => {
+    navigator.clipboard.writeText(jwtToken);
+    alert("Token copied to clipboard");
+  };
 
   return (
-    <>
-      <div className="min-h-screen flex flex-col">
-        <main className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-md w-full space-y-8 rounded-md shadow-md p-8">
-            <div>
-              <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Log in to your account
-              </h2>
-            </div>
-            <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
-              <input type="hidden" name="remember" value="true" />
-              <div className="rounded-md -space-y-px">
-                <div className="mb-4">
-                  <label htmlFor="email-address" className="sr-only">
-                    Username or Email
-                  </label>
-                  <input
-                    id="username"
-                    type="username"
-                    className={`appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm ${
-                      errors.username ? "border-red-400" : ""
-                    }`}
-                    placeholder="Username or Email"
-                    {...register("username", {
-                      required: "Username or Email is required",
-                    })}
-                  />
-                  {errors.username && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.username.message}
-                    </p>
-                  )}
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="password" className="sr-only">
-                    Password
-                  </label>
-                  <input
-                    id="password"
-                    type="password"
-                    className={`appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm ${
-                      errors.password ? "border-red-400" : ""
-                    }`}
-                    placeholder="Password"
-                    {...register("password", {
-                      required: "Password is required",
-                      minLength: {
-                        value: 6,
-                        message: "Password must be at least 6 characters long",
-                      },
-                    })}
-                  />
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.password.message}
-                    </p>
-                  )}
-                </div>
-              </div>
+    <Box
+      component="form"
+      onSubmit={handleLogin}
+      sx={{ 
+        display: "flex", 
+        flexDirection: "column", 
+        gap: 2, 
+        maxWidth: 400, 
+        mx: "auto", 
+        my: 4, 
+        p: 2 
+      }}
+    >
+      <Typography variant="h5" fontWeight="bold" textAlign="center">
+        Login to your account
+      </Typography>
+      <TextField
+        label="Username"
+        variant="outlined"
+        fullWidth
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      <TextField
+        label="Password"
+        variant="outlined"
+        type="password"
+        fullWidth
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <Button type="submit" variant="contained" fullWidth>
+        Login
+      </Button>
+      <Typography variant="body2" textAlign="center" mt={2}>
+        Don’t have an account?{" "}
+        <Link
+          component="button"
+          variant="body2"
+          onClick={() => router.push('/register')}
+          underline="hover"
+        >
+          Register
+        </Link>
+      </Typography>
 
-              <div className="flex items-center justify-end">
-                <div className="text-sm">
-                  <Link
-                    href="/forgot-password"
-                    className="font-medium text-indigo-600 hover:text-indigo-500"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
-              </div>
-
-              <div>
-                <button
-                  type="submit"
-                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  disabled={isLoggingIn}
-                >
-                  {isLoggingIn ? "Logging in..." : "Log in"}
-                </button>
-              </div>
-            </form>
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
-                <Link
-                  href="/register"
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  Sign up
-                </Link>
-              </p>
-            </div>
-          </div>
-        </main>
-      </div>
-    </>
+      {/* Snackbar for showing responses */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnackbar(false)}
+        action={
+          <Button color="inherit" onClick={() => setOpenSnackbar(false)}>
+            Close
+          </Button>
+        }
+      >
+        <Alert onClose={() => setOpenSnackbar(false)} severity={response?.includes("Error") ? "error" : "success"}>
+          {response}
+        </Alert>
+      </Snackbar>
+      
+      {jwtToken && (
+        <Box mt={2} textAlign="center">
+          <Button
+            onClick={handleCopyToken}
+            variant="outlined"
+            color="success"
+          >
+            Copy Token
+          </Button>
+        </Box>
+      )}
+    </Box>
   );
 }

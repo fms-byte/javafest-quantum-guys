@@ -1,129 +1,309 @@
 "use client";
-import Link from "next/link";
-import { useAuthProvider } from "@/lib/contexts/AuthContext";
-import { ArrowUpRight } from "lucide-react";
 
-export default function LandingPage() {
-  const { isAuthenticated } = useAuthProvider();
+import React, { useEffect, useState } from "react";
+import Navbar from "./Navbar";
+import { Container, Typography, Button, Box, Grid, Card, CardContent, CardActions } from "@mui/material";
+import { useRouter } from 'next/navigation';
+import { Pacifico } from "next/font/google";
+import { ApiClient, User } from "@asfilab/janun-client";
+
+const pacifico = Pacifico({ weight: "400", subsets: ["latin"] });
+
+const HomePage: React.FC = () => {
+  const router = useRouter();
+  const [toggleLearnMore, setToggleLearnMore] = React.useState(false);
+
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const apiUrl = "http://localhost:5000";
+        const token = localStorage.getItem("token") || "";
+        const apiClient = new ApiClient(apiUrl, token);
+        const result = await apiClient.auth.getUser();
+        setUser(result);
+      } catch (error: any) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const toggle = () => {
+    setToggleLearnMore(!toggleLearnMore);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-grow">
-        <section className="bg-gradient-to-r from-indigo-500 to-cyan-400 text-white py-20">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl sm:text-5xl font-extrabold mb-4">
-                Stay Informed with Janun
-              </h1>
-              <p className="text-xl mb-8">
-                Get real-time updates from government websites, universities,
-                and public institutions in Bangladesh.
-              </p>
-              {isAuthenticated ? (
-                <Link href="/feed" className="inline-block">
-                  <div className="flex items-center bg-white text-indigo-700 px-6 py-3 rounded-full font-semibold hover:bg-indigo-100 transition-colors">
-                    <span>Go to Feed</span>
-                    <ArrowUpRight className="ml-2" />
-                  </div>
-                </Link>
-              ) : (
-                <div className="space-x-4">
-                  <Link
-                    href="/feed"
-                    className="bg-white text-indigo-700 px-6 py-3 rounded-full font-semibold hover:bg-indigo-100 transition-colors"
-                  >
-                    Get Started
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="bg-transparent border-2 border-white text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-indigo-700 transition-colors"
-                  >
-                    Log In
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
+    <Box sx={{ overflow: "hidden" }}>
+      <Navbar />
 
-        <section className="py-20">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-center mb-12">
-              How Janun Works
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="bg-indigo-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    className="w-10 h-10 text-indigo-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Find Sources</h3>
-                <p className="text-gray-600">
-                  Browse and subscribe to various government and public
-                  institution websites.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="bg-indigo-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    className="w-10 h-10 text-indigo-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Get Notified</h3>
-                <p className="text-gray-600">
-                  Receive real-time updates and notifications about new
-                  information.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="bg-indigo-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    className="w-10 h-10 text-indigo-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Stay Informed</h3>
-                <p className="text-gray-600">
-                  Access all your important updates in one place, saving time
-                  and effort.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
+      {/* Hero Section */}
+      <Box sx={{ height: "100vh", overflow: "hidden", display: "flex", alignItems: "center" }}>
+        <Container>
+          <Grid container spacing={6}>
+            <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <Typography
+                variant="h2"
+                component="h1"
+                sx={{
+                  color: "#ffffff",
+                  mb: 2,
+                  fontWeight: "bold",
+                  fontSize: { xs: "2rem", md: "3rem" },
+                }}
+              >
+                Welcome to{" "}
+                <Box
+                  component="span"
+                  sx={{
+                    fontFamily: pacifico.style.fontFamily,
+                    fontSize: { xs: "2rem", md: "3rem" },
+                  }}
+                >
+                  Janun!
+                </Box>
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "#ffffff",
+                  mb: 4,
+                  fontSize: { xs: "1rem", md: "1.25rem" },
+                  width: { xs: "100%", md: "80%" },
+                }}
+              >
+                Stay informed with Janun, the app that delivers real-time updates
+                from public websites in Bangladesh. Subscribe to topics and get
+                instant notifications via email, SMS, or push alerts.
+              </Typography>
+              <Box sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+              }}>
+                <Button variant="contained" color="primary" sx={{ mr: 2 }} onClick={() => router.push('/feed')}>
+                  Open Feed
+                </Button>
+                {!user && (
+                  <Button variant="outlined" color="secondary" sx={{ mr: 2 }} onClick={() => router.push('/register')}>
+                    Register
+                  </Button>
+                )}
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box
+                component="img"
+                src="/images/know_everything.png"
+                alt="Hero Image"
+                sx={{
+                  width: "100%",
+                  height: "auto",
+                  borderRadius: "8px",
+                }}
+              />
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* About Section */}
+      <Box id="about" sx={{ height: "100vh", overflow: "hidden", py: 8, backgroundColor: "secondary.main" }}>
+        <Container>
+          <Grid container spacing={6}>
+            <Grid item xs={12} md={6}>
+              <Typography
+                variant="h4"
+                color="black"
+                sx={{ fontWeight: "bold", mb: 2 }}
+              >
+                About {""}
+                <Box
+                  component="span"
+                  sx={{
+                    fontFamily: pacifico.style.fontFamily,
+                    fontSize: { xs: "1rem", md: "2rem" },
+                  }}
+                >
+                  Janun!
+                </Box>
+              </Typography>
+              {
+                toggleLearnMore ? (
+                  <Typography variant="body1" color="black" sx={{ mb: 4 }}>
+                    Sometimes, we need updates from websites about exam results,
+                    tender notices, job openings, etc., and we constantly check
+                    these websites for days to stay updated. This is a common issue
+                    because most government and public institution websites lack
+                    notification features. This is where our app, Janun, comes into
+                    play. Janun is a web app that connects users with various public
+                    websites in Bangladesh, such as government websites, law courts,
+                    universities, and more. Users can connect to different public
+                    sites, subscribe to various topics, and receive notifications
+                    through channels like email, push notifications, SMS, and more.
+                    <br /> <br />
+                    Janun is not just a news aggregator; it has its own scraping
+                    system and crawlers that extract content from different sources,
+                    post it, analyze it, and notify users about news and updates.
+                    Janun will feature a recommendation system that suggests posts
+                    based on user activity (subscriptions, reactions, comments,
+                    etc.). It will feel like a social media platform where users can
+                    follow different websites, react to, and comment on content.
+                    Additionally, users will be able to view AI-generated weekly and
+                    monthly reports on what is happening in the country. With a
+                    wealth of content from public websites, the possibilities are
+                    endless.
+                  </Typography>
+                ) : (
+                  <Typography variant="body1" color="black" sx={{ mb: 4 }}>
+                    Janun is a web app that connects users with various public
+                    websites in Bangladesh, such as government websites, law courts,
+                    universities, and more. Users can connect to different public
+                    sites, subscribe to various topics, and receive notifications
+                    through channels like email, push notifications, SMS, and more.
+                  </Typography>
+                )
+              }
+
+              <Button variant="contained" color="primary" onClick={toggle}>
+                {toggleLearnMore ? "Show Less" : "Show More"}
+              </Button>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box
+                component="img"
+                src="/images/confuse_man.jpg"
+                alt="About Image"
+                sx={{
+                  width: "100%",
+                  height: "auto",
+                  borderRadius: "8px",
+                }}
+              />
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* How It Works Section */}
+      <Box sx={{ py: 8, backgroundColor: "primary.main" }}>
+        <Container>
+          <Grid container spacing={6}>
+            <Grid item xs={12} md={6}>
+              <Box
+                component="img"
+                src="/images/explaining_topic.jpg"
+                alt="How It Works"
+                sx={{
+                  width: "100%",
+                  height: "auto",
+                  borderRadius: "8px",
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography
+                variant="h4"
+                color="black"
+                sx={{ fontWeight: "bold", mb: 2 }}
+              >
+                How It Works
+              </Typography>
+              <Typography variant="body1" color="black" sx={{ mb: 4 }}>
+                Janun scans public websites for important updates and delivers
+                them to you in real-time. You can subscribe to specific topics
+                or websites and choose to receive updates via email, SMS, or
+                push notifications.
+                <br /> <br />
+                Our app is powered by a sophisticated AI system that analyzes
+                content from various sources and recommends posts based on your
+                interests. You can also view weekly and monthly reports on
+                trending topics in Bangladesh
+              </Typography>
+              <Button variant="contained" color="secondary" onClick={() => router.push('/register')}>
+                Get Started
+              </Button>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Pricing Section */}
+      <Box id="pricing" sx={{ py: 8, backgroundColor: "background.default" }}>
+        <Container>
+          <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2, textAlign: "center" }}>
+            Pricing
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 4, textAlign: "center" }}>
+            We offer a free plan for basic notifications, with premium options available for advanced features like SMS alerts and multiple topic subscriptions.
+          </Typography>
+          <Grid container spacing={4} justifyContent="center">
+            <Grid item xs={12} sm={6} md={4}>
+              <Card variant="outlined" sx={{ textAlign: "center", borderColor: "primary.main", border: "1px solid primary.main", borderRadius: "15px" }}>
+                <CardContent>
+                  <Typography variant="h5" sx={{ mb: 2 }}>
+                    Free Plan
+                  </Typography>
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    $0/month
+                  </Typography>
+                  <Typography variant="body2">
+                    Basic notifications via email and push alerts. Limited to one topic subscription.
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <Button variant="contained" color="primary" fullWidth>
+                    Choose Plan
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Card variant="outlined" sx={{ textAlign: "center", borderColor: "primary.main", border: "1px solid primary.main", borderRadius: "15px" }}>
+                <CardContent>
+                  <Typography variant="h5" sx={{ mb: 2 }}>
+                    Premium Plan
+                  </Typography>
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    $10/month
+                  </Typography>
+                  <Typography variant="body2">
+                    Advanced features including SMS alerts, multiple topic subscriptions, and priority support.
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <Button variant="contained" color="primary" fullWidth>
+                    Choose Plan
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Footer Section */}
+      <Box
+        sx={{
+          py: 4,
+          backgroundColor: "secondary.main",
+          color: "black",
+          textAlign: "center",
+        }}
+      >
+        <Container>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            © 2024 Janun. All Rights Reserved.
+          </Typography>
+          <Typography variant="body2" color="black">
+            Follow us on <a href="https://twitter.com/janun">Twitter</a> |{" "}
+            <a href="https://facebook.com/janun">Facebook</a>
+          </Typography>
+        </Container>
+      </Box>
+    </Box>
   );
-}
+};
+
+export default HomePage;

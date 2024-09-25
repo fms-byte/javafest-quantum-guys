@@ -1,181 +1,169 @@
 "use client";
-import Link from "next/link";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { useAuthProvider } from "@/lib/contexts/AuthContext";
-import { HashLoader } from "react-spinners";
+import { useState, useEffect } from "react";
+import { Box, Button, TextField, Typography, Link, Snackbar, Alert } from "@mui/material";
+import { ApiClient, User } from "@asfilab/janun-client";
+import { useRouter } from 'next/navigation';
 
-interface FormData {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
+export default function Register() {
+  const [response, setResponse] = useState<string | null>(null);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [usernameAvailable, setUsernameAvailable] = useState(false);
+  const router = useRouter();
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
-export default function RegisterPage() {
-  const {loading, signup} = useAuthProvider();
-  const [isRegistering, setIsRegistering] = useState(false);
+  useEffect(() => {
+    const checkUsername = async () => {
+      try {
+        const apiUrl = "http://localhost:5000";
+        const apiClient = new ApiClient(apiUrl);
+        const available = await apiClient.auth.checkUsername({ username });
+        setUsernameAvailable(available.available || false);
+      } catch (error) {
+        console.error("Error checking username:", error);
+      }
+    };
 
-  const {
-    register,
-    formState: { errors },
-    handleSubmit,
-  } = useForm({
-    defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
-
-  const onSubmit = async (data: FormData) => {
-    setIsRegistering(true);
-    if(data.password !== data.confirmPassword) {
-      setIsRegistering(false);
-      return console.error("Passwords do not match");
+    if (username) {
+      checkUsername();
     }
+  }, [username]);
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      await signup(data.email, data.password, data.username);
-      setIsRegistering(false);
-    } catch (error) {
-      setIsRegistering(false);
-      console.error("Registration failed:", error);
+      const apiUrl = "http://localhost:5000";
+      const apiClient = new ApiClient(apiUrl);
+      if (!usernameAvailable) {
+        setResponse("Username already taken");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+      const result: User = await apiClient.auth.register({
+        registerRequest: {
+          username,
+          email,
+          password,
+        },
+      });
+      console.log("Registered:", result);
+      setResponse("Registration successful!");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+
+      // Redirect after a short delay
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Error registering:", error);
+      setResponse(error.message || "Error registering");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
     }
   };
 
-  if(loading || isRegistering) {
-    return (
-      <div className="flex items-center justify-center h-screen mx-auto">
-        <HashLoader color="#6366F1" size={50} />
-      </div>
-    );
-  }
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8 rounded-md shadow-md p-8">
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Create your account
-            </h2>
-          </div>
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div className="rounded-md">
-              <div className="mb-2">
-                <label htmlFor="username" className="sr-only">
-                  Username
-                </label>
-                <input
-                  id="username"
-                  type="username"
-                  className={`appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm ${
-                    errors.username ? "border-red-400" : ""
-                  }`}
-                  placeholder="Username"
-                  {...register("username", {
-                    required: "Username is required",
-                  })}
-                />
-                {errors.username && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.username.message}
-                  </p>
-                )}
-              </div>
-              <div className="mb-2">
-                <label htmlFor="email-address" className="sr-only">
-                  Email address
-                </label>
-                <input
-                  id="email-address"
-                  type="email"
-                  className={`appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm ${
-                    errors.email ? "border-red-400" : ""
-                  }`}
-                  placeholder="Email address"
-                  {...register("email", {
-                    required: "Email address is required",
-                  })}
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-              <div className="mb-2">
-                <label htmlFor="password" className="sr-only">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  className={`appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm ${
-                    errors.password ? "border-red-400" : ""
-                  }`}
-                  placeholder="Password"
-                  {...register("password", {
-                    required: "Password is required",
-                    minLength: {
-                      value: 6,
-                      message: "Password must be at least 6 characters long",
-                    },
-                  })}
-                />
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
-              <div className="mb-2">
-                <label htmlFor="confirm-password" className="sr-only">
-                  Confirm password
-                </label>
-                <input
-                  id="confirm-password"
-                  type="password"
-                  className={`appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm ${
-                    errors.confirmPassword ? "border-red-400" : ""
-                  }`}
-                  placeholder="Confirm Password"
-                  {...register("confirmPassword", {
-                    required: "Confirm Password is required",
-                  })}
-                />
-                {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.confirmPassword.message}
-                  </p>
-                )}
-              </div>
-            </div>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        p: 2,
+        bgcolor: "background.default",
+      }}
+    >
+      <Typography variant="h4" fontWeight="bold" mb={4}>
+        Register
+      </Typography>
+      <Box
+        component="form"
+        onSubmit={handleRegister}
+        sx={{
+          width: { xs: "100%", sm: "400px" },
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          p: 3,
+          bgcolor: "background.paper",
+          borderRadius: 1,
+          boxShadow: 3,
+        }}
+      >
+        <TextField
+          label="Username"
+          variant="outlined"
+          fullWidth
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          error={!!username && !usernameAvailable}
+          helperText={
+            username && !usernameAvailable ? "Username already taken" :
+              username && usernameAvailable ? "Username available" : ""
+          }
+        />
+        <TextField
+          label="Email"
+          variant="outlined"
+          type="email"
+          fullWidth
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <TextField
+          label="Password"
+          variant="outlined"
+          type="password"
+          fullWidth
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          disabled={!usernameAvailable || !username || !email || !password}
+          onClick={handleRegister}
+        >
+          Register
+        </Button>
+        <Typography variant="body2" textAlign="center" mt={2}>
+          Already have an account?{" "}
+          <Link
+            component="button"
+            variant="body2"
+            onClick={() => router.push('/login')}
+            underline="hover"
+          >
+            Login
+          </Link>
+        </Typography>
+      </Box>
 
-            <div>
-              <button
-                type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                disabled={isRegistering}
-              >
-                {isRegistering ? "Creating account..." : "Create account"}
-              </button>
-            </div>
-          </form>
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
-              >
-                Log in
-              </Link>
-            </p>
-          </div>
-        </div>
-      </main>
-    </div>
+      {/* Snackbar for success/error messages */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
+          {response}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 }
